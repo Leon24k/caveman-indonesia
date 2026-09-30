@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="t d">
+  <title id="t">caveman-indonesia logo</title>
+  <desc id="d">A moai stone head wearing a black peci, on a red and white circle.</desc>
+  <defs>
+    <clipPath id="badge"><circle cx="128" cy="128" r="116"/></clipPath>
+  </defs>
+  <g clip-path="url(#badge)">
+    <!-- merah putih -->
+    <rect x="0" y="0" width="256" height="128" fill="#CE1126"/>
+    <rect x="0" y="128" width="256" height="128" fill="#FFFFFF"/>
+    <!-- shoulders -->
+    <path d="M66 256 L82 204 L174 204 L190 256 Z" fill="#7a8087"/>
+    <!-- ears -->
+    <path d="M79 114 L88 112 L90 174 L81 176 Z" fill="#7a8087"/>
+    <path d="M177 114 L168 112 L166 174 L175 176 Z" fill="#6c7279"/>
+    <!-- head -->
+    <path d="M90 86 L166 86 L172 150 Q174 190 162 210 L94 210 Q82 190 84 150 Z" fill="#9aa0a6"/>
+    <path d="M142 86 L166 86 L172 150 Q174 190 162 210 L148 210 Z" fill="#000" opacity="0.13"/>
+    <!-- brow and eyes -->
+    <path d="M91 103 L165 103 L161 120 L95 120 Z" fill="#4b5058"/>
+    <path d="M100 120 L124 120 L122 131 L102 131 Z" fill="#2f3338"/>
+    <path d="M132 120 L156 120 L154 131 L134 131 Z" fill="#2f3338"/>
+    <!-- nose -->
+    <path d="M122 110 L134 110 L143 162 Q128 170 113 162 Z" fill="#b5bac0"/>
+    <path d="M113 162 Q128 170 143 162 L141 167 Q128 175 115 167 Z" fill="#4b5058"/>
+    <!-- mouth -->
+    <path d="M106 181 Q128 174 150 181 L148 187 Q128 182 108 187 Z" fill="#4b5058"/>
+    <path d="M112 190 Q128 196 144 190 L142 195 Q128 201 114 195 Z" fill="#7a8087"/>
+    <!-- stone texture -->
+    <g fill="#4b5058" opacity="0.28">
+      <circle cx="98" cy="146" r="2.2"/><circle cx="156" cy="140" r="1.8"/>
+      <circle cx="104" cy="198" r="1.6"/><circle cx="150" cy="200" r="2"/>
+      <circle cx="120" cy="226" r="2.4"/><circle cx="160" cy="232" r="1.8"/>
+    </g>
+    <!-- peci -->
+    <path d="M83 93 L88 54 Q128 40 168 54 L173 93 Q128 84 83 93 Z" fill="#161616"/>
+    <path d="M90 60 Q128 47 166 60 L166.6 65 Q128 53 89.4 65 Z" fill="#303030"/>
+  </g>
+  <circle cx="128" cy="128" r="116" fill="none" stroke="#1f1f1f" stroke-width="8"/>
+</svg>

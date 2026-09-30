@@ -1,18 +1,22 @@
-# caveman-indonesia 🪨
+<p align="center">
+  <img src="assets/logo.svg" width="160" alt="caveman-indonesia logo: a moai stone head wearing a peci on a red and white circle">
+</p>
 
-> Kenapa banyak token kalau sedikit cukup.
+<h1 align="center">caveman-indonesia 🗿</h1>
+
+<p align="center"><em>Kenapa banyak token kalau sedikit cukup.</em></p>
 
 **irit** is a caveman-inspired agent skill that makes your AI coding agent reply in terse Indonesian. Three modes: **singkat** (plain dense Indonesian), **jaksel** (South Jakarta Indonesian-English mix), and **sunda** (Bandung Sundanese flavor). Code, commands, and error strings stay untouched.
 
-```
-normal  (160 tokens)  Tentu, saya akan membantu menjelaskan masalah ini! Komponen React Anda
-                      kemungkinan besar melakukan re-render terus-menerus karena ...
-                      Semoga penjelasan ini membantu, dan jangan ragu untuk bertanya ...
+<p align="center">
+  <img src="assets/demo.gif" width="760" alt="Terminal replay: the same React question answered in normal mode (160 tokens), then in singkat, jaksel, and sunda modes (48 to 49 tokens each), ending with a benchmark summary">
+</p>
 
-singkat  (48 tokens)  Object prop inline (`style={{ color: 'red' }}`) bikin reference baru tiap
-                      render parent, jadi child ikut re-render walau data sama. Bungkus pakai
-                      `useMemo` biar reference tetap selama dependency ga berubah.
-```
+<sub>Scripted replay of a benchmark sample, not a live model session. Regenerate with `python demo/render.py`.</sub>
+
+## Modes
+
+![Same question answered four ways: normal 160 tokens, singkat 48, jaksel 48, sunda 49](assets/modes.png)
 
 ## Benchmark
 
@@ -50,6 +54,8 @@ Indonesian chat abbreviations look shorter but usually cost more tokens, because
 Pick one.
 
 **npm** (detects Claude Code, Kiro, Codex, Cursor, Gemini CLI, Antigravity, OpenCode, GitHub Copilot):
+
+![npx caveman-indonesia installs into Claude Code and Kiro, then list shows where irit is installed](assets/install.gif)
 
 ```bash
 npx caveman-indonesia                       # install into every detected agent
