@@ -1,0 +1,38 @@
+{
+  "name": "caveman-indonesia",
+  "version": "0.1.0",
+  "description": "Caveman-style terse replies for Indonesian coding agents. Installs the irit skill (singkat, jaksel, sunda modes).",
+  "keywords": [
+    "caveman",
+    "agent-skills",
+    "claude-code",
+    "kiro",
+    "codex",
+    "cursor",
+    "indonesia",
+    "token-optimization"
+  ],
+  "homepage": "https://github.com/Leon24k/caveman-indonesia#readme",
+  "bugs": {
+    "url": "https://github.com/Leon24k/caveman-indonesia/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leon24k/caveman-indonesia.git"
+  },
+  "license": "MIT",
+  "author": "Rivo Rumadi",
+  "bin": {
+    "caveman-indonesia": "bin/cli.js"
+  },
+  "files": [
+    "bin/cli.js",
+    "skills/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  }
+}

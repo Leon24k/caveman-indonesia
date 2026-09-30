@@ -47,23 +47,42 @@ Indonesian chat abbreviations look shorter but usually cost more tokens, because
 
 ## Install
 
-With the [skills CLI](https://skills.sh) (Claude Code, Codex, Cursor, Kiro, Gemini CLI, OpenCode, and 70+ more agents):
+Pick one.
+
+**npm** (detects Claude Code, Kiro, Codex, Cursor, Gemini CLI, Antigravity, OpenCode, GitHub Copilot):
+
+```bash
+npx caveman-indonesia                       # install into every detected agent
+npx caveman-indonesia --agent claude-code   # or pick agents: kiro,codex,cursor,...
+npx caveman-indonesia --project             # current project instead of home dir
+npx caveman-indonesia list                  # where is it installed
+npx caveman-indonesia uninstall
+```
+
+Add `--dry-run` to preview. The installer never overwrites or deletes a folder named `irit` that is not this skill unless you pass `--force`.
+
+**Claude Code plugin marketplace:**
+
+```
+/plugin marketplace add Leon24k/caveman-indonesia
+/plugin install irit@caveman-indonesia
+```
+
+Plugin skills are namespaced, so the command is `/irit:irit`. Saying "mode irit" works too.
+
+**[skills CLI](https://skills.sh)** (70+ agents):
 
 ```bash
 npx skills add Leon24k/caveman-indonesia        # current project
 npx skills add Leon24k/caveman-indonesia -g     # all projects
 ```
 
-Manual copy:
+**Manual copy:**
 
 ```bash
 git clone https://github.com/Leon24k/caveman-indonesia.git && cd caveman-indonesia
-
-# Claude Code
-mkdir -p ~/.claude/skills && cp -R skills/irit ~/.claude/skills/
-
-# Kiro
-mkdir -p ~/.kiro/skills && cp -R skills/irit ~/.kiro/skills/
+mkdir -p ~/.claude/skills && cp -R skills/irit ~/.claude/skills/   # Claude Code
+mkdir -p ~/.kiro/skills && cp -R skills/irit ~/.kiro/skills/       # Kiro
 ```
 
 For other agents, copy `skills/irit/SKILL.md` into the agent's skills folder, or paste its body into your `AGENTS.md` or rules file.
@@ -97,6 +116,14 @@ python3 -m venv .venv
 ```
 
 To add a sample, append an entry to `benchmarks/samples.json` with `normal`, `singkat`, `jaksel`, and `sunda` replies.
+
+## Development
+
+```bash
+npm test    # installer tests (node:test, no dependencies)
+```
+
+Releasing: bump `version` in both `package.json` and `.claude-plugin/plugin.json` (a test fails if they differ), then `npm publish`.
 
 ## Credits
 
