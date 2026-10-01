@@ -9,14 +9,14 @@
 **irit** is a caveman-inspired agent skill that makes your AI coding agent reply in terse Indonesian. Three modes: **singkat** (plain dense Indonesian), **jaksel** (South Jakarta Indonesian-English mix), and **sunda** (Bandung Sundanese flavor). Code, commands, and error strings stay untouched.
 
 <p align="center">
-  <img src="assets/demo.gif" width="760" alt="Terminal replay: the same React question answered in normal mode (160 tokens), then in singkat, jaksel, and sunda modes (48 to 49 tokens each), ending with a benchmark summary">
+  <img src="assets/demo.gif" width="760" alt="Terminal replay: the same React question answered in normal mode (160 tokens), then in singkat, jaksel, and sunda modes (48 to 59 tokens), ending with a benchmark summary">
 </p>
 
 <sub>Scripted replay of a benchmark sample, not a live model session. Regenerate with `python demo/render.py`.</sub>
 
 ## Modes
 
-![Same question answered four ways: normal 160 tokens, singkat 48, jaksel 48, sunda 49](assets/modes.png)
+![Same question answered four ways: normal 160 tokens, singkat 48, jaksel 55, sunda 59](assets/modes.png)
 
 ## Benchmark
 
@@ -26,14 +26,15 @@ Reproducible with `python benchmarks/run.py`. Six hand-written reply pairs, coun
 |---|---|---|
 | normal | 868 | 1051 |
 | singkat | 307 (-64.6%) | 357 (-66.0%) |
-| jaksel | 292 (-66.4%) | 321 (-69.5%) |
-| sunda | 313 (-63.9%) | 364 (-65.4%) |
+| jaksel | 340 (-60.8%) | 369 (-64.9%) |
+| sunda | 350 (-59.7%) | 407 (-61.3%) |
 
 What these numbers are and are not:
 
 - The samples are written by hand to show what each mode should produce. They are not live model outputs. Real savings depend on how well your model follows the skill.
 - tiktoken is a proxy. Claude and Gemini use different tokenizers, so exact counts will differ.
-- The skill itself costs about 770 tokens (o200k) each time it loads. It pays off after a few replies, not on a single short answer.
+- The dialect modes cost a few points more than singkat. Sundanese function words and affixed English verbs are often 2 tokens instead of 1. That is the price of sounding like Bandung or South Jakarta instead of Indonesian with one particle on top.
+- The skill itself costs about 1,030 tokens (o200k) each time it loads. It pays off after a few replies, not on a single short answer.
 
 ## The one rule that matters: short is not cheap
 
@@ -47,7 +48,7 @@ Indonesian chat abbreviations look shorter but usually cost more tokens, because
 | karena | 1 | krn | 2 |
 | juga | 1 | jg | 2 |
 
-(o200k_base, with leading space.) So irit bans these and saves tokens by cutting greetings, closers, hedging, and restated questions instead. The benchmark script fails if any banned abbreviation turns out not to be more expensive, or if the list in `SKILL.md` drifts from the one in the script.
+(o200k_base, with leading space.) So irit bans these and saves tokens by cutting greetings, closers, hedging, and restated questions instead. The benchmark script fails if any banned abbreviation turns out not to be more expensive, or if the list in `SKILL.md` drifts from the one in the script. It also checks dialect density: sunda samples must be at least 25% Sundanese loma words with no lemes or cohag forms, and jaksel samples at least 10% English markers.
 
 ## Install
 
@@ -105,8 +106,8 @@ For other agents, copy `skills/irit/SKILL.md` into the agent's skills folder, or
 Same question, three modes:
 
 - **singkat:** Object prop inline bikin reference baru tiap render, jadi child re-render. Bungkus pakai `useMemo`.
-- **jaksel:** Object prop inline bikin reference baru tiap render, so child re-render. Fix: bungkus pakai `useMemo`.
-- **sunda:** Object prop inline teh bikin reference baru tiap render, jadi child re-render. Bungkus pakai `useMemo`.
+- **jaksel:** Basically object prop inline bikin reference baru tiap render, so child ke-trigger re-render. Wrap pakai `useMemo` aja.
+- **sunda:** Object prop inline teh jadi reference anyar unggal render, matak child re-render wae. Bungkus ku `useMemo` atuh.
 
 ## Safety
 

@@ -43,6 +43,23 @@ BANNED = {
     "skrg": "sekarang",
 }
 
+# Dialect markers. Samples in a dialect mode must use enough of them, so the
+# mode cannot quietly degrade into plain Indonesian with one particle on top.
+SUNDA_LOMA = set(
+    "teu geus can nu jeung atawa lamun sabab da oge wae pisan aya ieu eta kudu ku ka ti dina "
+    "tuluy deui unggal anyar robah hayang beres lila beurat hampang loba boga sorangan mah teh atuh "
+    "euy matak ngarah sanajan tetep salila kaluar benerkeun izinkeun dipake kabuka kakontrol "
+    "munggaran biasana hasilna datana babagi luhur tur sakuat ngan sababaraha ngablokir ngirim nyimpen".split()
+)
+SUNDA_FORBIDDEN = set("aing sia abdi anjeun sanes tiasa kedah maneh".split())  # cohag, lemes, direct address
+JAKSEL_MARKERS = set(
+    "basically literally honestly actually so but even usually least which prefer sense worth safe clean "
+    "wrap stay allow fix changes open loaded first initial run full virtualize shared share layer or "
+    "reuse trigger push unstage block handle".split()  # English verbs used with di-/ke-/nge- affixes
+)
+MIN_DIALECT_RATIO = {"sunda": 0.25, "jaksel": 0.10}
+MAX_PER_REPLY = {"atuh": 1, "euy": 1}
+
 
 def count(enc: tiktoken.Encoding, text: str) -> int:
     return len(enc.encode(text))
@@ -59,6 +76,30 @@ def check_banned(encs: dict[str, tiktoken.Encoding]) -> list[str]:
         if not cheaper_somewhere:
             wrong.append(f"{abbr} (vs {full})")
     return wrong
+
+
+def prose_words(text: str) -> list[str]:
+    """Lowercase words outside inline code, keeping affixed forms like datana or file-na split."""
+    return re.findall(r"[a-z]+", re.sub(r"`[^`]*`", " ", text).lower())
+
+
+def dialect_problems(mode: str, text: str) -> list[str]:
+    words = prose_words(text)
+    if not words or mode not in MIN_DIALECT_RATIO:
+        return []
+    markers = SUNDA_LOMA if mode == "sunda" else JAKSEL_MARKERS
+    ratio = sum(w in markers for w in words) / len(words)
+    out = []
+    if ratio < MIN_DIALECT_RATIO[mode]:
+        out.append(f"dialect too thin: {ratio:.0%} marker words, need {MIN_DIALECT_RATIO[mode]:.0%}")
+    if mode == "sunda":
+        bad = sorted(set(words) & SUNDA_FORBIDDEN)
+        if bad:
+            out.append(f"wrong register (cohag/lemes/address): {bad}")
+        for w, cap in MAX_PER_REPLY.items():
+            if words.count(w) > cap:
+                out.append(f"'{w}' used {words.count(w)}x, max {cap}")
+    return out
 
 
 def find_banned(text: str) -> list[str]:
@@ -110,6 +151,8 @@ def main() -> int:
             hit = find_banned(s[m])
             if hit:
                 failures.append(f"{s['id']}/{m}: uses banned abbreviation {hit}")
+            for problem in dialect_problems(m, s[m]):
+                failures.append(f"{s['id']}/{m}: {problem}")
         rows.append(row)
 
     summary = {
