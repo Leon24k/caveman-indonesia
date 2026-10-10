@@ -1,0 +1,398 @@
+/* caveman-indonesia landing page.
+   Typographic poster grammar: type is the imagery, the moai is the only figure.
+   Engine selectors ([data-sc-*], .sc-stage) are not restyled here. */
+
+:root {
+  --sc-canvas:     #0c0c0d;
+  --sc-surface:    #17161a;
+  --sc-ink:        #f3efe9;
+  --sc-ink-soft:   #b1aaa3;
+  --sc-accent:     #f0453d;
+  --sc-accent-ink: #120708;
+  --sc-font-display: "Archivo", "Geist", system-ui, sans-serif;
+  --sc-font-text:    "Geist", system-ui, sans-serif;
+  --sc-font-mono:    "Geist Mono", ui-monospace, monospace;
+
+  --stone:     #9aa0a6;
+  --merah:     #ce1126;
+  --tok-a:     color-mix(in oklab, var(--sc-ink) 7%, transparent);
+  --tok-b:     color-mix(in oklab, var(--sc-ink) 13%, transparent);
+  --hot:       var(--hot);   /* text on an accent tint: cracking tokens, inline code */
+  --moai-shadow: color-mix(in oklab, var(--sc-canvas) 70%, transparent);
+  color-scheme: dark;
+}
+
+/* Light: the same poster printed on paper. The engine drifts --sc-canvas
+   through the dark act colours and writes it inline; !important wins over that
+   inline value, and page.js mirrors the drift onto paper as --canvas-light. */
+html[data-theme="light"] {
+  color-scheme: light;
+  --sc-canvas:     var(--canvas-light, #f3efe9) !important;
+  --sc-surface:    #e7e1d9;
+  --sc-ink:        #141215;
+  --sc-ink-soft:   #5b544e;
+  --sc-accent:     #b81e17;
+  --sc-accent-ink: #fff6f4;
+  --sc-shadow-color: 28 14% 32%;
+  --stone:         #575e65;
+  --hot:           #7d130f;
+  --moai-shadow:   color-mix(in oklab, #3b332d 30%, transparent);
+}
+html[data-theme="light"] .sc-grain { opacity: 0.06; }
+
+/* Theme switch: the circle opens from the button (page.js), so both snapshots
+   stay put instead of the default crossfade. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+.theme {
+  position: fixed; z-index: 21;
+  top: max(var(--sc-3), env(safe-area-inset-top)); right: max(var(--sc-3), env(safe-area-inset-right));
+  display: inline-flex; align-items: center; gap: var(--sc-2);
+  min-height: 2.75rem; padding: 0 var(--sc-4); border: 0; border-radius: 999px; cursor: pointer;
+  appearance: none; font: 500 var(--sc-t-xs)/1 var(--sc-font-mono);
+  letter-spacing: var(--sc-track-wide); text-transform: uppercase;
+  color: var(--sc-ink); background: color-mix(in oklab, var(--sc-surface) 84%, transparent);
+  box-shadow: var(--sc-edge), 0 0 0 1px var(--sc-hairline);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  transition: transform 120ms var(--sc-ease-out);
+}
+.theme:active { transform: scale(0.96); }
+.theme:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+/* Half-lit disc: the lit half turns to face the side you are switching to. */
+.theme__dot {
+  width: 0.95rem; height: 0.95rem; border-radius: 50%; flex: none;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+  box-shadow: inset 0 0 0 1.5px currentColor;
+  transition: rotate 420ms var(--sc-ease-out);
+}
+html[data-theme="light"] .theme__dot { rotate: 180deg; }
+
+/* --------------------------------------------------------------- basics -- */
+code { font-family: var(--sc-font-mono); font-size: 0.92em; }
+.vh {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+.skip {
+  position: fixed; top: var(--sc-3); left: var(--sc-3); z-index: 20;
+  padding: var(--sc-2) var(--sc-4); background: var(--sc-accent); color: var(--sc-accent-ink);
+  border-radius: var(--sc-r-sm); font-weight: 600; text-decoration: none;
+  transform: translateY(-160%); transition: transform 160ms var(--sc-ease-out);
+}
+.skip:focus-visible { transform: none; }
+
+/* The copy control is the CTA. Poster grammar: a plain underlined action, not a button island. */
+.cmd { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sc-2) var(--sc-5); }
+.cmd__code {
+  font-size: var(--sc-t-lg); color: var(--sc-ink);
+  padding: var(--sc-2) var(--sc-3); border-radius: var(--sc-r-sm);
+  background: var(--sc-surface); box-shadow: var(--sc-edge);
+}
+.cmd__code::before { content: "$ "; color: var(--sc-accent); }
+.copy {
+  appearance: none; border: 0; background: none; padding: var(--sc-1) 0; cursor: pointer;
+  font-weight: 600; color: var(--sc-ink);
+  text-decoration: underline; text-decoration-color: var(--sc-accent);
+  text-decoration-thickness: 2px; text-underline-offset: 0.3em;
+  transition: color 140ms var(--sc-ease-out), transform 120ms var(--sc-ease-out);
+}
+.copy:active { transform: translateY(1px); }
+.copy[data-done] { color: var(--sc-accent); }
+@media (hover: hover) and (pointer: fine) {
+  .copy:hover { color: var(--sc-accent); }
+}
+
+/* ----------------------------------------------------------------- hero -- */
+.hero__stage { isolation: isolate; }
+.hero__stage::after { display: none; }        /* keep the pointer data, drop the glow */
+.plane { position: absolute; pointer-events: none; }
+.plane img { max-width: none; height: auto; }
+.plane--disc   { z-index: 0; right: 7vw; top: 9vh; }
+.plane--disc img { width: min(56vh, 40vw); }
+.hero__mark {
+  position: absolute; z-index: 1; margin: 0;
+  left: 3.2vw; top: 3vh;
+  font-family: var(--sc-font-display); font-weight: 900; font-stretch: 125%;
+  /* Giant on purpose. page.js fits it: when the wordmark would run into the
+     headline it lifts and bleeds off the top edge (up to 40% of its height),
+     and only shrinks past that. tools/hero-overlap.mjs checks every size. */
+  font-size: var(--mark-fs, 39vw); line-height: 0.82; letter-spacing: -0.055em;
+  translate: 0 calc(-1px * var(--mark-shift, 0));
+  transform-origin: 0 0;
+  color: var(--sc-ink);
+  user-select: none;
+}
+/* Scrolling through the hero, the wordmark steps back and fades, so it is gone
+   before the next act arrives. Scale only: no parallax on type in this grammar. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__mark {
+    scale: calc(1 - var(--sc-p, 0) * 0.14);
+    opacity: clamp(0, calc(1.55 - var(--sc-p, 0) * 1.8), 1);
+  }
+}
+.plane--moai   { z-index: 2; right: 11vw; bottom: -6vh; }
+.plane--moai img { width: min(44vh, 30vw); filter: drop-shadow(-18px 24px 30px var(--moai-shadow)); }
+.plane--shards { z-index: 3; inset: 0; }
+.plane--shards img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Pointer lean: the spotlight publishes --sc-mx/--sc-my on the stage. The
+   engine owns `transform` on the planes (parallax), so lean uses `translate`
+   on the inner image, which composes instead of fighting. */
+.lean { translate: calc((var(--sc-mx, 0.5) - 0.5) * var(--lean-x)) calc((var(--sc-my, 0.5) - 0.5) * var(--lean-y)); }
+.lean--far  { --lean-x: -10px; --lean-y: -6px; }
+.lean--mid  { --lean-x: -26px; --lean-y: -14px; }
+.lean--near { --lean-x: -56px; --lean-y: -30px; }
+
+.hero__copy {
+  position: absolute; z-index: 4;
+  left: var(--sc-gutter); bottom: clamp(2.5rem, 9vh, 6rem);
+  max-width: min(46rem, 52vw);
+  display: grid; gap: var(--sc-4);
+}
+.hero__title {
+  margin: 0;
+  font-family: var(--sc-font-display); font-weight: 800; font-stretch: 112%;
+  font-size: clamp(2.4rem, 1.2rem + 3.6vw, 4.6rem);
+  line-height: 0.98; letter-spacing: -0.035em; text-wrap: balance;
+}
+.hero__sub { margin: 0; max-width: 40ch; font-size: var(--sc-t-lg); line-height: 1.45; color: var(--sc-ink-soft); }
+
+/* ---------------------------------------------------------------- quiet -- */
+.quiet { padding-block: clamp(5rem, 16vh, 11rem) clamp(6rem, 22vh, 14rem); }
+.quiet__wrap { display: grid; gap: var(--sc-5); }
+.quiet__line {
+  margin: 0; max-width: 22ch;
+  font-family: var(--sc-font-display); font-weight: 600; font-stretch: 100%;
+  font-size: var(--sc-t-2xl); line-height: 1.04; letter-spacing: -0.025em;
+  color: var(--sc-ink-soft);
+}
+.quiet__line--turn { color: var(--sc-ink); margin-top: var(--sc-6); }
+
+/* --------------------------------------------------------------- chisel -- */
+.chisel__stage {
+  display: grid; grid-template-columns: minmax(16rem, 0.8fr) 1.6fr;
+  grid-template-rows: 1fr auto;
+  column-gap: clamp(2rem, 5vw, 6rem);
+  padding: clamp(4rem, 12vh, 8rem) var(--sc-gutter) clamp(1.5rem, 5vh, 3rem);
+  align-items: center;
+}
+.chisel__side { align-self: center; display: grid; gap: var(--sc-5); }
+.chisel__prompt { margin: 0; font-size: var(--sc-t-lg); line-height: 1.4; max-width: 24ch; }
+.chisel__who {
+  display: block; margin-bottom: var(--sc-2);
+  font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); letter-spacing: var(--sc-track-wide);
+  text-transform: uppercase; color: var(--sc-ink-soft);
+}
+.chisel__count { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--sc-2); }
+.chisel__num {
+  font-family: var(--sc-font-display); font-weight: 900; font-stretch: 125%;
+  font-size: clamp(4.5rem, 1.5rem + 8.6vw, 10.5rem); line-height: 0.8; letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums; color: var(--sc-ink);
+  transition: color 240ms var(--sc-ease-out);
+}
+.chisel__stage[data-phase="irit"] .chisel__num { color: var(--sc-accent); }
+.chisel__unit { font-size: var(--sc-t-xl); font-weight: 600; color: var(--sc-ink-soft); }
+.chisel__phase { margin: 0; min-height: 3em; font-size: var(--sc-t-lg); line-height: 1.4; color: var(--sc-ink-soft); max-width: 26ch; }
+.chisel__body { display: grid; align-self: center; }
+.reply {
+  grid-area: 1 / 1; margin: 0;
+  font-size: clamp(0.95rem, 0.78rem + 0.55vw, 1.3rem); line-height: 1.95;
+  max-width: 60ch; color: var(--sc-ink);
+}
+.reply--irit { opacity: 0; font-size: clamp(1.15rem, 0.9rem + 0.9vw, 1.75rem); line-height: 1.8; }
+.chisel__note {
+  grid-column: 1 / -1; margin: 0; padding-top: var(--sc-4);
+  font-size: var(--sc-t-sm); color: var(--sc-ink-soft);
+}
+
+/* Real token boundaries, tinted alternately like a tokenizer view. */
+.tok {
+  display: inline; padding: 0.16em 0.04em; border-radius: 3px;
+  background: var(--tok-a);
+  box-decoration-break: clone; -webkit-box-decoration-break: clone;
+}
+.tok:nth-child(even) { background: var(--tok-b); }
+.tok.is-cracking { color: var(--hot); background: color-mix(in oklab, var(--sc-accent) 34%, transparent); }
+/* A fallen token leaves a chisel mark where it sat. The span keeps its box so the
+   stone does not reflow while the reader is watching it break. */
+.tok.is-gone { color: transparent; background: none; box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--sc-accent) 55%, transparent); }
+.is-reduced .tok.is-gone {
+  color: var(--sc-ink-soft); background: none;
+  text-decoration: line-through; text-decoration-color: var(--sc-accent); text-decoration-thickness: 2px;
+}
+.tok-shard {
+  position: absolute; pointer-events: none; z-index: 2; white-space: pre;
+  color: var(--hot); background: color-mix(in oklab, var(--sc-accent) 34%, transparent);
+  border-radius: 3px; padding: 0.16em 0.04em; will-change: transform, opacity;
+}
+.chisel__body { position: relative; }
+
+/* ----------------------------------------------------------------- abbr -- */
+.abbr { padding-block: clamp(6rem, 18vh, 12rem); }
+.abbr__grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-8) clamp(2rem, 6vw, 7rem);
+  align-items: center;
+}
+.abbr__title { font-weight: 800; font-stretch: 110%; font-size: var(--sc-t-3xl); }
+.abbr__lead .sc-body { font-size: var(--sc-t-lg); }
+.abbr__fig { margin: 0; padding-block: var(--sc-2); }
+.abbr__table { border-collapse: collapse; width: 100%; font-size: var(--sc-t-lg); }
+.abbr__table th {
+  text-align: left; font-family: var(--sc-font-mono); font-weight: 400; font-size: var(--sc-t-xs);
+  letter-spacing: var(--sc-track-wide); text-transform: uppercase; color: var(--sc-ink-soft);
+  padding: 0 var(--sc-3) var(--sc-3) 0; border-bottom: 1px solid var(--sc-hairline-strong);
+}
+.abbr__table td { padding: var(--sc-3) var(--sc-3) var(--sc-3) 0; border-bottom: 1px solid var(--sc-hairline); }
+.tk {
+  font-family: var(--sc-font-mono); display: inline-block; padding: 0.1em 0.38em; border-radius: 3px;
+  background: var(--tok-b);
+}
+.tk + .tk { margin-left: 3px; }
+.tk--b { background: color-mix(in oklab, var(--sc-accent) 30%, transparent); }
+.n { font-variant-numeric: tabular-nums; font-family: var(--sc-font-mono); }
+.n--bad { color: var(--sc-accent); font-weight: 500; }
+.abbr__out {
+  grid-column: 1 / -1; margin: 0; max-width: 30ch;
+  font-family: var(--sc-font-display); font-weight: 700; font-size: var(--sc-t-xl); line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* ---------------------------------------------------------------- modes -- */
+.modes__stage { display: flex; align-items: center; }
+.rail { align-items: stretch; gap: 0; padding-inline: var(--sc-gutter); }
+.rail__lead, .mode {
+  flex: 0 0 auto; padding: var(--sc-7) clamp(1.5rem, 3vw, 3rem);
+  display: flex; flex-direction: column; gap: var(--sc-4);
+}
+.rail__lead { width: clamp(20rem, 34vw, 32rem); padding-left: 0; justify-content: center; }
+.modes__title { font-weight: 800; font-stretch: 110%; font-size: var(--sc-t-3xl); }
+.mode { width: clamp(20rem, 36vw, 34rem); border-left: 1px solid var(--sc-hairline-strong); }
+.mode__name {
+  margin: 0; font-family: var(--sc-font-display); font-weight: 900; font-stretch: 125%;
+  font-size: clamp(3rem, 1.6rem + 4vw, 6rem); line-height: 0.9; letter-spacing: -0.045em;
+}
+.mode[data-mode="singkat"] .mode__name { color: var(--sc-ink); }
+.mode[data-mode="jaksel"] .mode__name  { color: var(--stone); }
+.mode[data-mode="sunda"] .mode__name   { color: var(--sc-accent); }
+.mode__what { margin: 0; color: var(--sc-ink-soft); }
+.mode__reply { margin: 0; flex: 1; font-size: var(--sc-t-lg); line-height: 1.55; max-width: 34ch; }
+.mode__reply code { color: var(--hot); }
+.mode__meta {
+  margin: 0; display: flex; gap: var(--sc-3); align-items: baseline;
+  font-family: var(--sc-font-mono); font-size: var(--sc-t-sm); color: var(--sc-ink-soft);
+}
+.mode__meta code { color: var(--sc-ink); }
+.mode__meta span { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--sc-ink); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .mode { opacity: var(--settle, 1); translate: 0 calc((1 - var(--settle, 1)) * 18px); }
+  .mode:nth-child(2) { --settle: clamp(0.55, calc(var(--sc-p, 0) * 4 + 0.35), 1); }
+  .mode:nth-child(3) { --settle: clamp(0.55, calc(var(--sc-p, 0) * 3.2 - 0.25), 1); }
+  .mode:nth-child(4) { --settle: clamp(0.55, calc(var(--sc-p, 0) * 2.6 - 0.75), 1); }
+}
+/* Without motion the rail cannot travel, so on wide screens it is laid out
+   whole: all three voices visible at once instead of hidden off the edge. */
+@media (prefers-reduced-motion: reduce) and (min-width: 1100px) {
+  .rail { display: grid; grid-template-columns: 1.1fr repeat(3, 1fr); width: 100%; }
+  .rail__lead, .mode { width: auto; }
+  .mode__name { font-size: clamp(2.4rem, 1rem + 3vw, 4rem); }
+  .mode__reply { font-size: var(--sc-t-base); }
+}
+
+/* ---------------------------------------------------------------- proof -- */
+.proof { padding-block: clamp(6rem, 16vh, 11rem) clamp(5rem, 14vh, 9rem); }
+.proof__grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: var(--sc-8) clamp(2rem, 6vw, 7rem); }
+.proof__title { font-weight: 800; font-stretch: 108%; font-size: var(--sc-t-2xl); line-height: 1.02; }
+.ledger { border-collapse: collapse; width: 100%; align-self: center; }
+.ledger th, .ledger td { padding: var(--sc-3) var(--sc-3) var(--sc-3) 0; border-bottom: 1px solid var(--sc-hairline); text-align: left; }
+.ledger thead th {
+  font-family: var(--sc-font-mono); font-weight: 400; font-size: var(--sc-t-xs);
+  letter-spacing: var(--sc-track-wide); text-transform: uppercase; color: var(--sc-ink-soft);
+  border-bottom-color: var(--sc-hairline-strong);
+}
+.ledger tbody th { font-weight: 600; font-size: var(--sc-t-lg); width: 6.5rem; }
+.ledger td:nth-child(2) { width: 4.5rem; }
+.ledger td:nth-child(3) { width: 100%; }
+.ledger__save { font-family: var(--sc-font-display); font-weight: 800; font-size: var(--sc-t-xl); color: var(--sc-accent); white-space: nowrap; }
+.bar {
+  display: block; height: 14px; border-radius: 2px; background: var(--sc-ink);
+  width: calc(var(--w) * 100%); transform-origin: 0 50%;
+}
+.ledger__row--normal .bar { background: var(--stone); }
+@media (prefers-reduced-motion: no-preference) {
+  .ledger .bar { transform: scaleX(0); transition: transform 1200ms var(--sc-ease-out); }
+  .ledger.is-in .bar { transform: none; }
+  .ledger.is-in tr:nth-child(2) .bar { transition-delay: 120ms; }
+  .ledger.is-in tr:nth-child(3) .bar { transition-delay: 220ms; }
+  .ledger.is-in tr:nth-child(4) .bar { transition-delay: 320ms; }
+}
+.proof__fine { grid-column: 1 / -1; margin: 0; max-width: 72ch; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+.safety {
+  grid-column: 1 / -1; margin-top: var(--sc-7);
+  display: grid; grid-template-columns: 1fr 1.15fr; gap: var(--sc-4) clamp(2rem, 6vw, 7rem);
+  padding-top: var(--sc-7); border-top: 1px solid var(--sc-hairline-strong);
+}
+.safety__title { margin: 0; grid-row: span 2; font-family: var(--sc-font-display); font-weight: 700; font-size: var(--sc-t-xl); line-height: 1.12; letter-spacing: -0.02em; max-width: 18ch; }
+.safety__quote {
+  margin: 0; padding: var(--sc-5); border-radius: var(--sc-r-sm);
+  background: var(--sc-surface); box-shadow: var(--sc-edge), var(--sc-e1);
+  line-height: 1.55;
+}
+.safety__quote strong { color: var(--sc-accent); }
+
+/* ---------------------------------------------------------------- close -- */
+.close__stage { display: grid; grid-template-rows: 1fr auto; }
+.close__inner {
+  align-self: center; justify-self: center; width: min(40rem, 100% - 2 * var(--sc-gutter));
+  display: grid; gap: var(--sc-5); justify-items: start;
+}
+.close__mark { width: 64px; height: 64px; }
+.close__title { margin: 0; font-family: var(--sc-font-display); font-weight: 700; font-size: var(--sc-t-xl); letter-spacing: -0.02em; }
+.close__alt { margin: 0; display: grid; gap: var(--sc-2); font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+.close__alt div { display: flex; flex-wrap: wrap; gap: var(--sc-1) var(--sc-3); }
+.close__alt dt { min-width: 7rem; }
+.close__alt dd { margin: 0; color: var(--sc-ink); }
+.close__last { margin: var(--sc-4) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+.foot {
+  display: flex; flex-wrap: wrap; gap: var(--sc-2) var(--sc-5); justify-content: center;
+  padding: var(--sc-5) var(--sc-gutter) calc(var(--sc-5) + env(safe-area-inset-bottom));
+  font-size: var(--sc-t-xs); color: var(--sc-ink-soft);
+}
+.foot a { color: var(--sc-ink); }
+
+/* --------------------------------------------------------------- mobile -- */
+@media (max-width: 860px) {
+  /* The wordmark owns the top of a phone screen: the switch becomes a 44px disc. */
+  .theme { width: 2.75rem; padding: 0; justify-content: center; }
+  .theme__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .hero__mark { left: 2.5vw; top: 5svh; }
+  .plane--disc { right: -12vw; top: auto; bottom: 4svh; }
+  .plane--disc img { width: 60vw; }
+  .plane--moai { right: 5vw; bottom: -8svh; }
+  .plane--moai img { width: 38vw; }
+  .plane--shards { inset: auto 0 0 0; height: 26svh; }
+  .hero__copy { left: var(--sc-gutter); right: var(--sc-gutter); top: 26svh; bottom: auto; max-width: none; }
+  .hero__title { font-size: clamp(2rem, 8.6vw, 2.8rem); }
+  .hero__sub { font-size: var(--sc-t-base); max-width: 30ch; }
+  .cmd__code { font-size: var(--sc-t-base); }
+
+  .chisel__stage {
+    grid-template-columns: 1fr; grid-template-rows: auto 1fr auto;
+    padding-top: clamp(1.5rem, 5svh, 3rem); row-gap: var(--sc-4); align-items: start;
+  }
+  .chisel__side { grid-template-columns: auto 1fr; align-items: end; gap: var(--sc-2) var(--sc-4); }
+  .chisel__prompt { grid-column: 1 / -1; font-size: var(--sc-t-base); max-width: none; }
+  .chisel__num { font-size: clamp(3.6rem, 18vw, 5rem); }
+  .chisel__unit { font-size: var(--sc-t-base); }
+  .chisel__phase { min-height: 2.8em; font-size: var(--sc-t-sm); }
+  .reply { font-size: 0.86rem; line-height: 1.82; }
+  .reply--irit { font-size: 1.1rem; }
+
+  .abbr__grid, .proof__grid, .safety { grid-template-columns: 1fr; }
+  .safety__title { grid-row: auto; }
+  .rail__lead { width: 82vw; }
+  .mode { width: 80vw; }
+  .ledger tbody th { width: 5rem; }
+}
+@media (max-width: 380px) {
+  .reply { font-size: 0.8rem; }
+}

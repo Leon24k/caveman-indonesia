@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" aria-hidden="true">
+  <!-- Stone chips knocked off the moai. Foreground plane. Kept out of the
+       lower-left copy zone so no chip ever sits under the headline. -->
+  <g fill="#8d939a">
+    <path d="M118 30 l30 -9 l11 23 l-20 20 l-27 -7 z"/>
+    <path d="M846 132 l26 4 l6 22 l-24 10 l-14 -18 z"/>
+    <path d="M610 540 l40 -6 l10 30 l-30 18 l-26 -16 z"/>
+  </g>
+  <g fill="#6c7279">
+    <path d="M560 300 l18 -12 l16 14 l-8 20 l-22 -2 z"/>
+    <path d="M590 40 l14 -6 l10 12 l-8 14 l-16 -4 z"/>
+    <path d="M960 540 l22 -4 l8 18 l-16 12 l-16 -10 z"/>
+  </g>
+  <g fill="#b5bac0">
+    <path d="M930 360 l12 -2 l6 10 l-8 8 l-10 -6 z"/>
+    <path d="M640 200 l10 -4 l8 8 l-6 10 l-12 -4 z"/>
+  </g>
+</svg>

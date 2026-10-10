@@ -1,0 +1,8 @@
+{
+  "name": "caveman-indonesia-site",
+  "private": true,
+  "description": "Landing page. Not part of the npm package.",
+  "devDependencies": {
+    "playwright-core": "1.56.0"
+  }
+}

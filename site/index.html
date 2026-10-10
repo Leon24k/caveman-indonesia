@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>irit · Agent kamu kebanyakan ngomong</title>
+<meta name="description" content="irit membuat coding agent menjawab dalam bahasa Indonesia yang ringkas. Tiga mode: singkat, jaksel, sunda. Kode, perintah, dan pesan error tetap utuh.">
+<meta property="og:title" content="irit · Agent kamu kebanyakan ngomong">
+<meta property="og:description" content="Skill coding agent ala caveman untuk bahasa Indonesia. Sekitar 60 sampai 65 persen lebih sedikit token di benchmark.">
+<meta name="theme-color" content="#0c0c0d">
+<script>
+  // Theme before first paint: ?theme= (for links and the harness), then the
+  // visitor's saved choice, then the system setting.
+  (function () {
+    var t = new URLSearchParams(location.search).get('theme');
+    if (t !== 'light' && t !== 'dark') { try { t = localStorage.getItem('irit-theme'); } catch (e) {} }
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="scrollcraft.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip" href="#pasang">Langsung ke cara pasang</a>
+<button class="theme" type="button" data-theme-toggle><span class="theme__dot" aria-hidden="true"></span><span class="theme__label">Mode terang</span></button>
+<span data-sc-progress></span>
+<div class="sc-grain" aria-hidden="true"></div>
+
+<main id="top">
+
+  <!-- 1 · Hero: pin + layered planes. The wordmark sits between the disc and
+       the moai, so the moai crosses in front of it. -->
+  <section class="hero" data-sc-act="pin" data-sc-span="1.6" data-sc-drift="#0c0c0d">
+    <div data-sc-stage class="hero__stage" data-sc-spotlight>
+      <div class="plane plane--disc" data-sc-parallax="-1.2"><img class="lean lean--far" src="assets/disc.svg" alt="" width="400" height="400"></div>
+      <p class="hero__mark" aria-hidden="true">irit</p>
+      <div class="plane plane--moai" data-sc-parallax="0.9"><img class="lean lean--mid" src="assets/moai.svg" alt="Maskot irit: kepala moai batu memakai peci hitam" width="680" height="1100"></div>
+      <div class="plane plane--shards" data-sc-parallax="2.4"><img class="lean lean--near" src="assets/shards.svg" alt="" width="1000" height="600"></div>
+
+      <div class="hero__copy">
+        <h1 class="hero__title" data-sc-cue="0 0.82 0" data-sc-kinetic="lines">Agent kamu kebanyakan ngomong.</h1>
+        <p class="hero__sub" data-sc-cue="0 0.82 0">irit memangkas basa-basinya. Kode, perintah, dan pesan error tetap utuh.</p>
+        <div class="cmd" data-sc-cue="0 0.82 0">
+          <code class="cmd__code">npx caveman-indonesia</code>
+          <button class="copy" type="button" data-copy="npx caveman-indonesia">Salin perintah</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · Quiet before the peak. Authored silence: three plain lines, nothing moves but their entrance. -->
+  <section class="quiet" data-sc-act="flow" data-sc-drift="#111012">
+    <div class="sc-wrap quiet__wrap" data-sc-in data-sc-stagger="90">
+      <p class="quiet__line">Sebelum menjawab, agent menyapa.</p>
+      <p class="quiet__line">Sesudah menjawab, agent mendoakan.</p>
+      <p class="quiet__line quiet__line--turn">Semuanya ditagih per token.</p>
+    </div>
+  </section>
+
+  <!-- 3 · Peak: pahat basa-basi. The reply is split into its real o200k_base
+       tokens; page.js drives the chisel from this act's --sc-p. -->
+  <section class="chisel" id="pahat" data-sc-act="pin" data-sc-span="4.2" data-sc-drift="#0c0c0d">
+    <div data-sc-stage class="chisel__stage" data-sc-verify-state="0|biasa|0.00">
+      <div class="chisel__side">
+        <p class="chisel__prompt"><span class="chisel__who">Pertanyaan</span> Kenapa komponen React saya re-render terus?</p>
+        <p class="chisel__count" aria-live="off"><span class="chisel__num" data-chisel-num>160</span><span class="chisel__unit">token</span></p>
+        <p class="chisel__phase" data-chisel-phase>Jawaban biasa, apa adanya.</p>
+      </div>
+      <div class="chisel__body">
+        <p class="reply reply--normal" data-reply="normal">Tentu, saya akan membantu menjelaskan masalah ini! Komponen React Anda kemungkinan besar melakukan re-render terus-menerus karena Anda membuat sebuah object baru sebagai prop di setiap proses render. Ketika Anda menuliskan object secara inline, misalnya `style={{ color: 'red' }}`, React akan menganggap bahwa object tersebut adalah reference yang baru setiap kali komponen parent melakukan render. Akibatnya, komponen child juga akan ikut melakukan re-render walaupun sebenarnya datanya tidak berubah sama sekali. Untuk mengatasi masalah ini, Anda dapat membungkus object tersebut dengan menggunakan hook `useMemo`, sehingga reference-nya akan tetap sama selama dependency-nya tidak berubah. Semoga penjelasan ini membantu, dan jangan ragu untuk bertanya jika ada hal lain yang ingin Anda ketahui!</p>
+        <p class="reply reply--irit" data-reply="singkat">Object prop inline (`style={{ color: 'red' }}`) bikin reference baru tiap render parent, jadi child ikut re-render walau data sama. Bungkus pakai `useMemo` biar reference tetap selama dependency ga berubah.</p>
+      </div>
+      <p class="chisel__note">Tiap kotak satu token o200k_base. Jawaban irit adalah sampel mode singkat dari benchmark.</p>
+    </div>
+  </section>
+
+  <!-- 4 · The abbreviation fact: flow + a wipe across the token pieces. -->
+  <section class="abbr" data-sc-act="flow" data-sc-drift="#141113">
+    <div class="sc-wrap abbr__grid">
+      <div class="abbr__lead" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display abbr__title">Singkat belum tentu hemat.</h2>
+        <p class="sc-body">Tokenizer hafal kata utuh. Singkatan malah dipotong jadi dua.</p>
+      </div>
+      <figure class="abbr__fig" data-sc-reveal="left" data-sc-reveal-at="0.16 0.52">
+        <table class="abbr__table">
+          <caption class="vh">Jumlah token kata utuh dibanding singkatannya, o200k_base, dengan spasi di depan</caption>
+          <thead><tr><th scope="col">Kata utuh</th><th scope="col">Token</th><th scope="col">Singkatan</th><th scope="col">Token</th></tr></thead>
+          <tbody data-abbr-rows>
+            <tr><td><span class="tk">tidak</span></td><td class="n">1</td><td><span class="tk">t</span><span class="tk tk--b">dk</span></td><td class="n n--bad">2</td></tr>
+            <tr><td><span class="tk">sudah</span></td><td class="n">1</td><td><span class="tk">ud</span><span class="tk tk--b">h</span></td><td class="n n--bad">2</td></tr>
+            <tr><td><span class="tk">dengan</span></td><td class="n">1</td><td><span class="tk">d</span><span class="tk tk--b">gn</span></td><td class="n n--bad">2</td></tr>
+            <tr><td><span class="tk">karena</span></td><td class="n">1</td><td><span class="tk">kr</span><span class="tk tk--b">n</span></td><td class="n n--bad">2</td></tr>
+            <tr><td><span class="tk">juga</span></td><td class="n">1</td><td><span class="tk">j</span><span class="tk tk--b">g</span></td><td class="n n--bad">2</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p class="abbr__out" data-sc-in>Jadi irit menulis kata utuh, lalu membuang basa-basinya.</p>
+    </div>
+  </section>
+
+  <!-- 5 · Range: three voices travel sideways. -->
+  <section class="modes" data-sc-act="pan" data-sc-span="3" data-sc-drift="#0f0e10">
+    <div data-sc-stage class="modes__stage">
+      <div class="rail" data-sc-pan="0.04">
+        <div class="rail__lead">
+          <h2 class="sc-display modes__title">Satu jawaban, tiga logat.</h2>
+          <p class="sc-body">Ganti kapan saja dengan <code>/irit</code>, <code>/irit jaksel</code>, atau <code>/irit sunda</code>. Balik normal dengan <code>/irit off</code>. Kalau kamu menulis dalam bahasa Inggris, irit menjawab dalam bahasa Inggris yang ringkas, tanpa logat.</p>
+        </div>
+        <article class="mode" data-mode="singkat">
+          <h3 class="mode__name">singkat</h3>
+          <p class="mode__what">Padat, tanpa hiasan.</p>
+          <p class="mode__reply" data-mode-text>Object prop inline (<code>style={{ color: 'red' }}</code>) bikin reference baru tiap render parent, jadi child ikut re-render walau data sama. Bungkus pakai <code>useMemo</code> biar reference tetap selama dependency ga berubah.</p>
+          <p class="mode__meta"><code>/irit</code><span data-mode-tokens>48</span> token</p>
+        </article>
+        <article class="mode" data-mode="jaksel">
+          <h3 class="mode__name">jaksel</h3>
+          <p class="mode__what">Tata bahasa Indonesia, kosakata Inggris diselipkan.</p>
+          <p class="mode__reply" data-mode-text>Basically, object prop inline (<code>style={{ color: 'red' }}</code>) itu bikin reference baru tiap parent render, so child ikut ke-trigger re-render even kalau datanya sama. Wrap pakai <code>useMemo</code> aja, reference-nya stay selama dependency ga berubah.</p>
+          <p class="mode__meta"><code>/irit jaksel</code><span data-mode-tokens>55</span> token</p>
+        </article>
+        <article class="mode" data-mode="sunda">
+          <h3 class="mode__name">sunda</h3>
+          <p class="mode__what">Sunda loma ala Bandung, bukan sekadar ditempeli <em>teh</em>.</p>
+          <p class="mode__reply" data-mode-text>Object prop inline (<code>style={{ color: 'red' }}</code>) teh jadi reference anyar unggal render parent, matak child ikut re-render sanajan datana teu robah. Bungkus ku <code>useMemo</code> atuh, ngarah reference-na tetep salila dependency teu robah.</p>
+          <p class="mode__meta"><code>/irit sunda</code><span data-mode-tokens>59</span> token</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Proof and safety: a plain section. Numbers come from data.js. -->
+  <section class="proof" data-sc-act="flow" data-sc-drift="#0c0c0d">
+    <div class="sc-wrap proof__grid">
+      <div class="proof__lead" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display proof__title">Angkanya dari benchmark. Kamu bisa mengulangnya.</h2>
+        <p class="sc-body">Enam pertanyaan, masing-masing dijawab dengan empat cara, lalu dihitung dengan tiktoken o200k_base. Jalankan <code>python benchmarks/run.py</code> di repo untuk angka yang sama.</p>
+      </div>
+      <table class="ledger" data-ledger>
+        <caption class="vh">Total token enam sampel per mode, dan persen hemat dibanding jawaban biasa</caption>
+        <thead><tr><th scope="col">Mode</th><th scope="col">Token</th><th scope="col"><span class="vh">Panjang relatif</span></th><th scope="col">Hemat</th></tr></thead>
+        <tbody>
+          <tr class="ledger__row ledger__row--normal" data-row="normal"><th scope="row">biasa</th><td class="n" data-v>868</td><td><span class="bar" style="--w:1"></span></td><td class="n">&nbsp;</td></tr>
+          <tr class="ledger__row" data-row="singkat"><th scope="row">singkat</th><td class="n" data-v>307</td><td><span class="bar" style="--w:0.354"></span></td><td class="n ledger__save" data-save>64,6%</td></tr>
+          <tr class="ledger__row" data-row="jaksel"><th scope="row">jaksel</th><td class="n" data-v>340</td><td><span class="bar" style="--w:0.392"></span></td><td class="n ledger__save" data-save>60,8%</td></tr>
+          <tr class="ledger__row" data-row="sunda"><th scope="row">sunda</th><td class="n" data-v>350</td><td><span class="bar" style="--w:0.403"></span></td><td class="n ledger__save" data-save>59,7%</td></tr>
+        </tbody>
+      </table>
+      <p class="proof__fine">Sampelnya ditulis tangan untuk menunjukkan bentuk tiap mode, bukan keluaran model langsung. Hasil nyata tergantung seberapa patuh model kamu. Skill ini sendiri memakan sekitar <span data-skill-tokens>1.028</span> token setiap dimuat, jadi hematnya baru terasa setelah beberapa jawaban.</p>
+
+      <div class="safety" data-sc-in data-sc-stagger="70">
+        <h3 class="safety__title">Kalau urusannya berisiko, irit berhenti irit.</h3>
+        <p class="sc-body">Peringatan keamanan, hapus data, force push, dan langkah yang urutannya penting ditulis lengkap. Setelah itu, irit lanjut ringkas.</p>
+        <blockquote class="safety__quote"><strong>Peringatan:</strong> Perintah ini menghapus permanen semua baris di tabel <code>users</code> dan tidak bisa dibatalkan. Pastikan backup sudah ada.</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · Close: the quietest type on the page. Last act, so every cue holds. -->
+  <section class="close" id="pasang" data-sc-act="pin" data-sc-span="1.3" data-sc-drift="#0c0c0d">
+    <div data-sc-stage class="close__stage">
+      <div class="close__inner">
+        <img class="close__mark" src="assets/logo.svg" alt="" width="64" height="64">
+        <h2 class="close__title" data-sc-cue="0.02">Pasang dalam satu baris.</h2>
+        <div class="cmd cmd--close" data-sc-cue="0.06">
+          <code class="cmd__code">npx caveman-indonesia</code>
+          <button class="copy" type="button" data-copy="npx caveman-indonesia">Salin perintah</button>
+        </div>
+        <dl class="close__alt" data-sc-cue="0.1">
+          <div><dt>Claude Code</dt><dd><code>/plugin marketplace add Leon24k/caveman-indonesia</code><br><code>/plugin install irit@caveman-indonesia</code></dd></div>
+          <div><dt>skills CLI</dt><dd><code>npx skills add Leon24k/caveman-indonesia</code></dd></div>
+        </dl>
+        <p class="close__last" data-sc-cue="0.14">Hemat token, bukan hemat makna.</p>
+      </div>
+      <footer class="foot">
+        <a href="https://github.com/Leon24k/caveman-indonesia">GitHub</a>
+        <a href="https://www.npmjs.com/package/caveman-indonesia">npm</a>
+        <span>Terinspirasi <a href="https://github.com/JuliusBrussee/caveman">caveman</a>. Lisensi MIT.</span>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<p class="copy-status vh" role="status" aria-live="polite" data-copy-status></p>
+
+<script src="data.js"></script>
+<script src="scrollcraft.js"></script>
+<script>ScrollCraft.mount(document.body);</script>
+<script src="page.js"></script>
+</body>
+</html>
