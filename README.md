@@ -75,7 +75,9 @@ Add `--dry-run` to preview. The installer never overwrites or deletes a folder n
 /plugin install irit@caveman-indonesia
 ```
 
-Plugin skills are namespaced, so the command is `/irit:irit`. Saying "mode irit" works too.
+The plugin turns irit on by itself: every new session starts in singkat with no command, and a short reminder each turn (about 40 tokens) keeps long sessions from drifting back to verbose. The mode you pick carries over to new sessions, and `/irit off` stays off until you turn it back on. Plugin skills are namespaced, so the command is `/irit:irit`. Saying "irit sunda" or "mode normal" works too.
+
+The other install methods add only the skill, so there you type `/irit` once per session. To have it always on in another agent, paste the body of `skills/irit/SKILL.md` into its rules file (`AGENTS.md`, `.cursor/rules`, and so on).
 
 **[skills CLI](https://skills.sh)** (70+ agents):
 
@@ -103,6 +105,8 @@ For other agents, copy `skills/irit/SKILL.md` into the agent's skills folder, or
 | `/irit sunda` | Sunda mode |
 | `/irit off` or "mode normal" | Back to normal replies |
 
+With the Claude Code plugin, irit is already on when a session starts, and the last mode you chose is remembered.
+
 Same question, three modes:
 
 - **singkat:** Object prop inline bikin reference baru tiap render, jadi child re-render. Bungkus pakai `useMemo`.
@@ -121,6 +125,15 @@ python3 -m venv .venv
 .venv/bin/python benchmarks/run.py         # table + checks, exit 1 on failure
 .venv/bin/python benchmarks/run.py --json  # machine-readable
 ```
+
+The table above uses tiktoken, OpenAI's tokenizer, as a stand-in. Two scripts measure Claude itself (set `ANTHROPIC_API_KEY` first):
+
+```bash
+.venv/bin/python benchmarks/run.py --claude   # same samples, counted with Claude's tokenizer (count_tokens is free)
+.venv/bin/python benchmarks/live.py           # real Claude replies with and without the skill (paid, about 24 requests)
+```
+
+`live.py` asks every sample question once with no system prompt and once per mode with `SKILL.md`, then reports reply tokens, billed output tokens, and the same banned-word and dialect checks on the live replies. Use `--model`, `--effort`, `--runs N` to average out variance, and `--json` to read every reply.
 
 To add a sample, append an entry to `benchmarks/samples.json` with `normal`, `singkat`, `jaksel`, and `sunda` replies.
 
