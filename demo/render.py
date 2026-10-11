@@ -35,7 +35,15 @@ SAMPLE_ID = "react-rerender"
 ENC = tiktoken.get_encoding("o200k_base")
 MODES = ["singkat", "jaksel", "sunda"]
 
-FONT_PATH = "/System/Library/Fonts/Menlo.ttc"
+# (regular, bold) as (path, face index), first one present wins. Menlo keeps
+# bold at index 1 of the same .ttc. Frames are laid out on Menlo's metrics, so
+# other fonts render close but not byte-identical media.
+FONTS = [
+    (("/System/Library/Fonts/Menlo.ttc", 0), ("/System/Library/Fonts/Menlo.ttc", 1)),
+    (("C:/Windows/Fonts/consola.ttf", 0), ("C:/Windows/Fonts/consolab.ttf", 0)),
+    (("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 0),
+     ("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 0)),
+]
 FONT_SIZE = 17
 LINE_H = 25
 PAD = 26
@@ -60,8 +68,11 @@ def tokens(text: str) -> int:
 
 
 def font(size: int = FONT_SIZE, bold: bool = False) -> ImageFont.FreeTypeFont:
-    # Menlo.ttc index 1 is bold.
-    return ImageFont.truetype(FONT_PATH, size, index=1 if bold else 0)
+    found = next((f for f in FONTS if os.path.exists(f[0][0])), None)
+    if not found:
+        raise SystemExit("no monospace font found, add one to FONTS in demo/render.py")
+    path, index = found[1 if bold else 0]
+    return ImageFont.truetype(path, size, index=index)
 
 
 F = font()
@@ -295,7 +306,9 @@ def install_gif() -> None:
     with tempfile.TemporaryDirectory() as home:
         for d in (".claude", ".kiro"):
             os.makedirs(os.path.join(home, d))
-        env = {**os.environ, "HOME": home}
+        # USERPROFILE too: on Windows os.homedir() reads it, not HOME, so without
+        # it the installer would write into the real home directory.
+        env = {**os.environ, "HOME": home, "USERPROFILE": home}
 
         def run(*args: str) -> list[str]:
             out = subprocess.run(
