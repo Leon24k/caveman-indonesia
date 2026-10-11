@@ -4,7 +4,7 @@
 
 <h1 align="center">caveman-indonesia 🗿</h1>
 
-<p align="center"><em>Kenapa banyak token kalau sedikit cukup.</em></p>
+<p align="center"><em>Kenapa banyak token kalau sedikit cukup.</em><br><a href="https://leon24k.github.io/caveman-indonesia/">leon24k.github.io/caveman-indonesia</a></p>
 
 **irit** is a caveman-inspired agent skill that makes your AI coding agent reply in terse Indonesian. Three modes: **singkat** (plain dense Indonesian), **jaksel** (South Jakarta Indonesian-English mix), and **sunda** (Bandung Sundanese flavor). Code, commands, and error strings stay untouched.
 
@@ -128,6 +128,15 @@ To add a sample, append an entry to `benchmarks/samples.json` with `normal`, `si
 
 ```bash
 npm test    # installer tests (node:test, no dependencies)
+```
+
+Landing page (`site/`, deployed to GitHub Pages from `main` by CI):
+
+```bash
+cd site && npm ci
+npm run serve        # http://localhost:4500
+npm run check        # browser checks, in a second terminal, needs Chrome (or CHROME=/path)
+npm run build-data   # regenerate data.js after changing benchmarks/samples.json or SKILL.md
 ```
 
 Releasing: bump `version` in both `package.json` and `.claude-plugin/plugin.json` (a test fails if they differ), then `npm publish`.
