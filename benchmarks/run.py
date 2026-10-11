@@ -2,31 +2,39 @@
 """Token benchmark for the irit skill.
 
 Counts tokens of a verbose "normal" Indonesian reply vs each irit mode,
-using OpenAI tiktoken encodings as a tokenizer proxy. Also checks that:
+using OpenAI tiktoken encodings as a tokenizer proxy, plus Claude's own
+tokenizer with --claude. Also checks that:
   1. every abbreviation banned in SKILL.md really costs more tokens than the full word
-  2. no sample reply in an irit mode uses a banned abbreviation
-  3. every irit mode is shorter than the normal reply
+     (in some tiktoken encoding, and in Claude's tokenizer when --claude is given)
+  2. the banned list in SKILL.md matches BANNED below
+  3. no sample reply in an irit mode uses a banned abbreviation
+  4. every irit mode is shorter than the normal reply
+  5. dialect modes stay dialect: enough marker words, right Sundanese register
 
 Exit code 1 if any check fails, so this doubles as a test.
 
 Usage:
     python benchmarks/run.py            # table + checks
     python benchmarks/run.py --json     # machine-readable output
+    python benchmarks/run.py --claude   # also count with Claude (needs ANTHROPIC_API_KEY)
 """
 
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import sys
 from pathlib import Path
+from typing import Callable
 
 import tiktoken
 
 ROOT = Path(__file__).resolve().parent
 SAMPLES = ROOT / "samples.json"
 ENCODINGS = ["o200k_base", "cl100k_base"]
+CLAUDE_MODEL = "claude-opus-5-5"
 MODES = ["singkat", "jaksel", "sunda"]
 
 # Banned abbreviation -> full word. Must stay in sync with SKILL.md "Token rules".
@@ -61,19 +69,37 @@ MIN_DIALECT_RATIO = {"sunda": 0.25, "jaksel": 0.10}
 MAX_PER_REPLY = {"atuh": 1, "euy": 1}
 
 
-def count(enc: tiktoken.Encoding, text: str) -> int:
-    return len(enc.encode(text))
+Counter = Callable[[str], int]
 
 
-def check_banned(encs: dict[str, tiktoken.Encoding]) -> list[str]:
-    """Return abbreviations that are NOT more expensive in any encoding."""
+def tiktoken_counter(name: str) -> Counter:
+    enc = tiktoken.get_encoding(name)
+    return lambda text: len(enc.encode(text))
+
+
+def claude_counter(model: str) -> Counter:
+    """Count with Claude's tokenizer through the free count_tokens endpoint."""
+    import anthropic  # only needed for --claude
+
+    client = anthropic.Anthropic()
+
+    def raw(text: str) -> int:
+        return client.messages.count_tokens(
+            model=model, messages=[{"role": "user", "content": text}]
+        ).input_tokens
+
+    # count_tokens includes the message wrapper. Subtract it, measured on "a",
+    # assumed to be 1 token. Pair comparisons (banned words) cancel it exactly.
+    wrapper = raw("a") - 1
+    return functools.cache(lambda text: raw(text) - wrapper)
+
+
+def check_banned(counters: dict[str, Counter]) -> list[str]:
+    """Return abbreviations that are NOT more expensive in any of the given counters."""
     wrong = []
     for abbr, full in BANNED.items():
         # Leading space: words mid-sentence are tokenized with their space.
-        cheaper_somewhere = any(
-            count(e, " " + abbr) > count(e, " " + full) for e in encs.values()
-        )
-        if not cheaper_somewhere:
+        if not any(c(" " + abbr) > c(" " + full) for c in counters.values()):
             wrong.append(f"{abbr} (vs {full})")
     return wrong
 
@@ -117,14 +143,20 @@ def skill_banned_list() -> set[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--json", action="store_true", help="print JSON result")
+    parser.add_argument("--claude", nargs="?", const=CLAUDE_MODEL, metavar="MODEL",
+                        help=f"also count with Claude's tokenizer (default model {CLAUDE_MODEL})")
     args = parser.parse_args()
 
-    encs = {name: tiktoken.get_encoding(name) for name in ENCODINGS}
+    tik = {name: tiktoken_counter(name) for name in ENCODINGS}
+    claude = {f"claude:{args.claude}": claude_counter(args.claude)} if args.claude else {}
+    counters = tik | claude
     samples = json.loads(SAMPLES.read_text(encoding="utf-8"))
     failures: list[str] = []
 
-    for item in check_banned(encs):
+    for item in check_banned(tik):
         failures.append(f"banned abbreviation not actually more expensive: {item}")
+    for item in check_banned(claude) if claude else []:
+        failures.append(f"banned abbreviation not more expensive on Claude: {item}")
 
     in_skill = skill_banned_list()
     if in_skill != set(BANNED):
@@ -133,16 +165,16 @@ def main() -> int:
             f"only in run.py {sorted(set(BANNED) - in_skill)}"
         )
 
-    totals = {enc: {m: 0 for m in ["normal", *MODES]} for enc in ENCODINGS}
+    totals = {enc: {m: 0 for m in ["normal", *MODES]} for enc in counters}
     rows = []
     for s in samples:
         row = {"id": s["id"]}
-        for enc_name, enc in encs.items():
-            n = count(enc, s["normal"])
+        for enc_name, count in counters.items():
+            n = count(s["normal"])
             totals[enc_name]["normal"] += n
             row[f"{enc_name}:normal"] = n
             for m in MODES:
-                k = count(enc, s[m])
+                k = count(s[m])
                 totals[enc_name][m] += k
                 row[f"{enc_name}:{m}"] = k
                 if k >= n:
@@ -164,13 +196,13 @@ def main() -> int:
             for m in MODES
         }
         | {"normal": {"tokens": totals[enc]["normal"], "saved_pct": 0.0}}
-        for enc in ENCODINGS
+        for enc in counters
     }
 
     if args.json:
         print(json.dumps({"rows": rows, "summary": summary, "failures": failures}, indent=2))
     else:
-        enc = ENCODINGS[0]
+        enc = next(iter(claude), ENCODINGS[0])
         print(f"Per sample ({enc}):")
         print(f"{'sample':<18}{'normal':>8}" + "".join(f"{m:>10}" for m in MODES))
         for r in rows:
@@ -179,12 +211,12 @@ def main() -> int:
                 + "".join(f"{r[f'{enc}:{m}']:>10}" for m in MODES)
             )
         print("\nTotal (tokens, % saved vs normal):")
-        for enc_name in ENCODINGS:
+        for enc_name in counters:
             parts = [f"normal {summary[enc_name]['normal']['tokens']}"] + [
                 f"{m} {summary[enc_name][m]['tokens']} (-{summary[enc_name][m]['saved_pct']}%)"
                 for m in MODES
             ]
-            print(f"  {enc_name:<12} " + " | ".join(parts))
+            print(f"  {enc_name:<24} " + " | ".join(parts))
         print()
         if failures:
             print("FAIL")
