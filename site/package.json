@@ -2,6 +2,11 @@
   "name": "caveman-indonesia-site",
   "private": true,
   "description": "Landing page. Not part of the npm package.",
+  "scripts": {
+    "serve": "npx --yes http-server@14 . -p 4500 -c-1 -s",
+    "check": "node tools/check.mjs && node tools/hero-overlap.mjs",
+    "build-data": "python tools/build-data.py"
+  },
   "devDependencies": {
     "playwright-core": "1.56.0"
   }

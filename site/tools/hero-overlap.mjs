@@ -2,6 +2,7 @@
 // at every viewport the letters of "irit" must be fully on screen (dots of the
 // i's included) and end at least 16px above the headline, and the hero copy
 // must fit on screen.
+// Installed Chrome, or CHROME=/path/to/chromium.
 // Run from site/ with the server up: node tools/hero-overlap.mjs
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -9,7 +10,7 @@ const { chromium } = createRequire(path.join(process.cwd(), "package.json"))("pl
 
 const SIZES = [[1568, 893], [1440, 900], [1440, 820], [1366, 768], [1280, 720], [1920, 1080], [2560, 1080], [1024, 700],
   [820, 1180], [430, 932], [390, 844], [375, 667], [360, 640]];
-const b = await chromium.launch({ executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" });
+const b = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : { channel: "chrome" });
 let fail = 0;
 for (const [w, h] of SIZES) {
   const p = await b.newPage({ viewport: { width: w, height: h } });
