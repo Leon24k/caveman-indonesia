@@ -1,12 +1,13 @@
 // Functional checks the scroll harness does not cover: rail overflow, page
 // overflow, copy button outcome, keyboard focus order, chisel end state.
+// Installed Chrome, or CHROME=/path/to/chromium.
 // Run from site/: node tools/check.mjs
 import { createRequire } from "node:module";
 import path from "node:path";
 const { chromium } = createRequire(path.join(process.cwd(), "package.json"))("playwright-core");
 
 const URL = process.env.URL || "http://localhost:4500";
-const browser = await chromium.launch({ executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" });
+const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : { channel: "chrome" });
 let fail = 0;
 const ok = (c, msg) => { console.log((c ? "ok   " : "FAIL ") + msg); if (!c) fail++; };
 
@@ -33,6 +34,12 @@ for (const [w, h] of [[1440, 900], [390, 844], [360, 640]]) {
   await page.keyboard.press("Tab");
   const first = await page.evaluate(() => document.activeElement.className);
   ok(first === "skip", `${w}px first focus is skip link (${first})`);
+
+  // Skip link lands on the install section with its content lit, not blank.
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(1500);
+  const lit = await page.evaluate(() => ["close__title", "cmd--close"].map((c) => +getComputedStyle(document.querySelector("." + c)).opacity));
+  ok(lit.every((o) => o > 0.9), `${w}px skip link shows install section (opacity ${lit})`);
 
   // Chisel end state: scroll to 90% of the peak act.
   const end = await page.evaluate(async () => {
@@ -75,6 +82,18 @@ for (const [w, h] of [[1440, 900], [390, 844], [360, 640]]) {
 
   ok(errors.length === 0, `${w}px console errors: ${errors.join(" | ") || "none"}`);
   await ctx.close();
+
+  // Reduced motion: the modes act is not pinned and every card is on screen horizontally.
+  const rctx = await browser.newContext({ viewport: { width: w, height: h }, reducedMotion: "reduce" });
+  const rp = await rctx.newPage();
+  await rp.goto(URL, { waitUntil: "networkidle" });
+  const r = await rp.evaluate(() => ({
+    extra: document.querySelector(".modes").offsetHeight - document.querySelector(".rail").offsetHeight,
+    right: Math.max(...[...document.querySelectorAll(".mode")].map((m) => m.getBoundingClientRect().right)),
+  }));
+  ok(r.right <= w, `${w}px reduced motion: modes fit width (right edge ${Math.round(r.right)})`);
+  ok(r.extra <= 1, `${w}px reduced motion: modes act not pinned (${r.extra}px beyond its content)`);
+  await rctx.close();
 }
 await browser.close();
 process.exit(fail ? 1 : 0);

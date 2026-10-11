@@ -17,7 +17,7 @@
   --merah:     #ce1126;
   --tok-a:     color-mix(in oklab, var(--sc-ink) 7%, transparent);
   --tok-b:     color-mix(in oklab, var(--sc-ink) 13%, transparent);
-  --hot:       var(--hot);   /* text on an accent tint: cracking tokens, inline code */
+  --hot:       #ffc4bd;   /* text on an accent tint: cracking tokens, inline code */
   --moai-shadow: color-mix(in oklab, var(--sc-canvas) 70%, transparent);
   color-scheme: dark;
 }
@@ -289,13 +289,24 @@ code { font-family: var(--sc-font-mono); font-size: 0.92em; }
   .mode:nth-child(3) { --settle: clamp(0.55, calc(var(--sc-p, 0) * 3.2 - 0.25), 1); }
   .mode:nth-child(4) { --settle: clamp(0.55, calc(var(--sc-p, 0) * 2.6 - 0.75), 1); }
 }
-/* Without motion the rail cannot travel, so on wide screens it is laid out
-   whole: all three voices visible at once instead of hidden off the edge. */
+/* Without motion the rail cannot travel, so the act stops pinning and is laid
+   out whole: a grid on wide screens, a stack below. */
+@media (prefers-reduced-motion: reduce) {
+  .modes { height: auto !important; }  /* beats the engine's inline span height */
+  .modes__stage { position: static; height: auto; }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 1099px) {
+  .rail { flex-direction: column; }
+  .rail > .rail__lead, .rail > .mode { width: auto; }  /* beats the 860px widths below */
+  .rail__lead { padding-bottom: 0; }
+  .mode { border-left: 0; border-top: 1px solid var(--sc-hairline-strong); padding-inline: 0; }
+}
+/* Wide screens: all three voices visible at once instead of hidden off the edge. */
 @media (prefers-reduced-motion: reduce) and (min-width: 1100px) {
-  .rail { display: grid; grid-template-columns: 1.1fr repeat(3, 1fr); width: 100%; }
+  .rail { display: grid; grid-template-columns: minmax(0, 1.1fr) repeat(3, minmax(0, 1fr)); width: 100%; }
   .rail__lead, .mode { width: auto; }
   .mode__name { font-size: clamp(2.4rem, 1rem + 3vw, 4rem); }
-  .mode__reply { font-size: var(--sc-t-base); }
+  .mode__reply { font-size: var(--sc-t-base); overflow-wrap: anywhere; }
 }
 
 /* ---------------------------------------------------------------- proof -- */
@@ -340,6 +351,11 @@ code { font-family: var(--sc-font-mono); font-size: 0.92em; }
 .safety__quote strong { color: var(--sc-accent); }
 
 /* ---------------------------------------------------------------- close -- */
+/* #pasang sits one viewport above the act's end, so the skip link and a
+   #pasang URL scroll to p = 1, where every cue is lit. The act top is p = 0,
+   where the title and command are still invisible. */
+.close { position: relative; }
+.close__anchor { position: absolute; top: calc(100% - 100vh); }
 .close__stage { display: grid; grid-template-rows: 1fr auto; }
 .close__inner {
   align-self: center; justify-self: center; width: min(40rem, 100% - 2 * var(--sc-gutter));
