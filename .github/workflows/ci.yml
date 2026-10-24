@@ -72,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Copy only what the page serves, plus the link preview image
-        run: mkdir _site && cp -r site/index.html site/*.js site/*.css site/assets _site/ && cp assets/modes.png _site/og.png
+        run: mkdir _site && cp -r site/index.html site/*.js site/*.css site/assets _site/ && cp assets/social.png _site/og.png
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

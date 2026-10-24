@@ -4,6 +4,7 @@
 Outputs (all in assets/):
   demo.gif     scripted terminal replay of one benchmark sample in every mode
   modes.png    static card: same question, normal vs singkat vs jaksel vs sunda
+  social.png   modes.png letterboxed to 1280x640 for link previews (GitHub, og:image)
   install.gif  real output of the npm installer, run in a throwaway HOME
 
 The replies come from benchmarks/samples.json and token counts from tiktoken,
@@ -301,6 +302,14 @@ def modes_png() -> None:
     img.save(ASSETS / "modes.png", optimize=True)
 
 
+def social_png() -> None:
+    card = Image.open(ASSETS / "modes.png")
+    card.thumbnail((1240, 600))
+    img = Image.new("RGB", (1280, 640), C["bg"])
+    img.paste(card, ((1280 - card.width) // 2, (640 - card.height) // 2))
+    img.save(ASSETS / "social.png", optimize=True)
+
+
 def install_gif() -> None:
     """Run the real installer in a throwaway HOME with Claude Code and Kiro present."""
     with tempfile.TemporaryDirectory() as home:
@@ -338,8 +347,9 @@ def main() -> None:
     ASSETS.mkdir(exist_ok=True)
     demo_gif()
     modes_png()
+    social_png()
     install_gif()
-    for name in ("demo.gif", "modes.png", "install.gif"):
+    for name in ("demo.gif", "modes.png", "social.png", "install.gif"):
         p = ASSETS / name
         print(f"{p.relative_to(ROOT)}  {p.stat().st_size / 1024:.0f} KB")
 
