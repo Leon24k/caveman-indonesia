@@ -1,6 +1,7 @@
 name: Publish
 
-# Push a tag like v0.3.1 to publish that version to npm. Uses npm trusted
+# Push a tag like v0.3.1 to publish that version to npm and create a GitHub
+# release listing the commits since the previous tag. Uses npm trusted
 # publishing (OIDC), so there is no npm token in the repo secrets. Set it up once
 # on npmjs.com: package settings, Trusted Publisher, GitHub Actions,
 # repository Leon24k/caveman-indonesia, workflow publish.yml.
@@ -10,14 +11,16 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: read
-  id-token: write
+  contents: write  # GitHub release
+  id-token: write  # npm trusted publishing
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # all tags, for the release notes
       - uses: actions/setup-node@v5
         with:
           node-version: 24  # trusted publishing needs npm 11.5.1 or newer
@@ -26,3 +29,11 @@ jobs:
         run: test "${GITHUB_REF_NAME}" = "v$(node -p 'require("./package.json").version')"
       - run: npm test
       - run: npm publish
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prev=$(git describe --tags --abbrev=0 "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          git log --no-merges --pretty='- %s' ${prev:+"$prev.."}"$GITHUB_REF_NAME" > notes.md
+          [ -n "$prev" ] && echo "**Full changelog:** https://github.com/$GITHUB_REPOSITORY/compare/$prev...$GITHUB_REF_NAME" >> notes.md
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag
