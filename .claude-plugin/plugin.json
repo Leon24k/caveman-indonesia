@@ -2,7 +2,7 @@
   "name": "irit",
   "displayName": "irit (caveman-indonesia)",
   "version": "0.3.1",
-  "description": "Caveman-style terse replies for Indonesian. Modes: singkat, jaksel, sunda. About 65% fewer output tokens.",
+  "description": "Caveman-style terse replies for Indonesian. Modes: singkat, jaksel, sunda. About half the output tokens in a live Claude test.",
   "author": {
     "name": "Rivo Rumadi",
     "url": "https://github.com/Leon24k"

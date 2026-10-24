@@ -9,7 +9,7 @@
     {
       "name": "irit",
       "source": "./",
-      "description": "Terse Indonesian replies. Modes: singkat, jaksel, sunda. About 65% fewer output tokens."
+      "description": "Terse Indonesian replies. Modes: singkat, jaksel, sunda. About half the output tokens in a live Claude test."
     }
   ]
 }

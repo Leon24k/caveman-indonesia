@@ -36,6 +36,22 @@ What these numbers are and are not:
 - The dialect modes cost a few points more than singkat. Sundanese function words and affixed English verbs are often 2 tokens instead of 1. That is the price of sounding like Bandung or South Jakarta instead of Indonesian with one particle on top.
 - The skill itself costs about 1,030 tokens (o200k) each time it loads. It pays off after a few replies, not on a single short answer.
 
+### Live on Claude
+
+Real replies, not hand-written ones: `python benchmarks/live.py --claude-code` with Claude Opus 5.5 inside Claude Code, effort medium, the six sample questions, one run (October 2026). Visible reply tokens, mean per question:
+
+| Mode | Reply tokens | Saved |
+|---|---|---|
+| normal (Claude Code default) | 1,089 | |
+| singkat | 528 | -51.5% |
+| jaksel | 562 | -48.4% |
+| sunda | 551 | -49.4% |
+
+- Live replies keep their code blocks, lists, and caveats, so they save less than the hand-written samples. About half is the number to expect.
+- Both destructive requests (wiping a production table, force pushing to main) got a full, plain-Indonesian warning in every mode.
+- Sunda read as Sundanese. Jaksel came out mostly plain Indonesian, with 1 to 5% English markers against the 10% the samples hit, so the jaksel rules in `SKILL.md` still need work.
+- One run per question. Expect a few points of variance; use `--runs 3` before relying on small differences.
+
 ## The one rule that matters: short is not cheap
 
 Indonesian chat abbreviations look shorter but usually cost more tokens, because tokenizers know the full words and split the abbreviations into pieces.
@@ -126,14 +142,20 @@ python3 -m venv .venv
 .venv/bin/python benchmarks/run.py --json  # machine-readable
 ```
 
-The table above uses tiktoken, OpenAI's tokenizer, as a stand-in. Two scripts measure Claude itself (set `ANTHROPIC_API_KEY` first):
+The table above uses tiktoken, OpenAI's tokenizer, as a stand-in. `live.py` measures real Claude replies with and without the skill. It runs through your Claude Code login, no API key needed:
+
+```bash
+.venv/bin/python benchmarks/live.py --claude-code   # about 32 requests on your Claude plan
+```
+
+The baseline is Claude Code's own system prompt, and irit appends `SKILL.md` to it, which is close to real use. Your settings, plugins, hooks, MCP servers and tools are switched off for these runs so they cannot skew either side. It reports reply tokens and billed output tokens from Claude itself, the same banned-word and dialect checks on the live replies, and two destructive requests (wiping a production table, force pushing to main) that must still get a clear warning in every mode. Use `--model`, `--effort`, `--runs N` to average out variance, and `--json` to read every reply.
+
+With `ANTHROPIC_API_KEY` set you can also use the API directly:
 
 ```bash
 .venv/bin/python benchmarks/run.py --claude   # same samples, counted with Claude's tokenizer (count_tokens is free)
-.venv/bin/python benchmarks/live.py           # real Claude replies with and without the skill (paid, about 24 requests)
+.venv/bin/python benchmarks/live.py           # API instead of Claude Code; the baseline has no system prompt at all
 ```
-
-`live.py` asks every sample question once with no system prompt and once per mode with `SKILL.md`, then reports reply tokens, billed output tokens, and the same banned-word and dialect checks on the live replies. Use `--model`, `--effort`, `--runs N` to average out variance, and `--json` to read every reply.
 
 To add a sample, append an entry to `benchmarks/samples.json` with `normal`, `singkat`, `jaksel`, and `sunda` replies.
 
