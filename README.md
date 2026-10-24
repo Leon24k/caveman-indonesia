@@ -105,7 +105,7 @@ For other agents, copy `skills/irit/SKILL.md` into the agent's skills folder, or
 | `/irit sunda` | Sunda mode |
 | `/irit off` or "mode normal" | Back to normal replies |
 
-With the Claude Code plugin, irit is already on when a session starts, and the last mode you chose is remembered.
+In the Claude Code plugin the command is `/irit:irit` (`/irit:irit sunda`, and so on). irit is already on when a session starts, and the last mode you chose is remembered. A spoken switch like "irit sunda" or "mode normal" only counts as a short message of up to five words, so a long prompt that happens to mention "mode normal" leaves irit alone.
 
 Same question, three modes:
 
@@ -152,7 +152,7 @@ npm run check        # browser checks, in a second terminal, needs Chrome (or CH
 npm run build-data   # regenerate data.js after changing benchmarks/samples.json or SKILL.md
 ```
 
-Releasing: bump `version` in both `package.json` and `.claude-plugin/plugin.json` (a test fails if they differ), then `npm publish`.
+Releasing: bump `version` in both `package.json` and `.claude-plugin/plugin.json` (a test fails if they differ), merge to `main`, then push a matching tag (`git tag v0.3.1 && git push origin v0.3.1`). The `Publish` workflow tests and publishes to npm through trusted publishing, so no npm token or local login is needed.
 
 ## Credits
 

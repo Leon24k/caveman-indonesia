@@ -57,8 +57,13 @@ function rules(mode) {
 }
 
 const reminder = (mode) =>
-  `irit ON (${mode}): terse Indonesian, no greeting/closer/hedging/recap, full words not tdk/udh/dgn. ` +
+  `irit ON (${mode}): terse, in the user's language, no greeting/closer/hedging/recap, full words not tdk/udh/dgn. ` +
   'Code, commits, PRs, warnings: write normally.';
+
+// A spoken switch only counts in a short message, so a bug report that happens to
+// say "mode normal" does not turn irit off for every future session.
+// ponytail: word-count heuristic; longer requests to switch need /irit.
+const MAX_SPOKEN_WORDS = 5;
 
 // Returns the new mode if the prompt switches irit, else null.
 function parseSwitch(prompt) {
@@ -70,6 +75,7 @@ function parseSwitch(prompt) {
     if (arg === 'off' || MODES.includes(arg)) return arg;
     return null;
   }
+  if (p.split(/\s+/).length > MAX_SPOKEN_WORDS) return null;
   if (/\b(irit off|mode normal|matikan irit|stop irit)\b/.test(p)) return 'off';
   const named = p.match(/\birit (singkat|jaksel|sunda)\b/);
   if (named) return named[1];

@@ -74,3 +74,13 @@ test('parseSwitch ignores unrelated prompts and unknown args', () => {
   assert.equal(parseSwitch('mode normal aja'), 'off');
   assert.equal(parseSwitch('/irit OFF'), 'off');
 });
+
+test('a long message that only mentions a switch phrase does not switch', () => {
+  assert.equal(parseSwitch('setelah crash, app tidak balik ke mode normal'), null);
+  assert.equal(parseSwitch('buat fungsi mode irit untuk hemat baterai'), null);
+  assert.equal(parseSwitch('tolong irit sunda dong'), 'sunda');
+});
+
+test('the reminder follows the user language, not always Indonesian', (t) => {
+  assert.match(sandbox(t).say('why does the build fail?'), /in the user's language/);
+});

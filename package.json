@@ -1,6 +1,6 @@
 {
   "name": "caveman-indonesia",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Caveman-style terse replies for Indonesian coding agents. Installs the irit skill (singkat, jaksel, sunda modes).",
   "keywords": [
     "caveman",
