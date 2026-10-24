@@ -11,13 +11,23 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [18, 24]  # engines floor, current LTS
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 18  # engines floor
+          node-version: ${{ matrix.node }}
       - run: npm test
+
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -48,7 +58,7 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: [test, site]
+    needs: [test, bench, site]
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -61,8 +71,8 @@ jobs:
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
-      - name: Copy only what the page serves
-        run: mkdir _site && cp -r site/index.html site/*.js site/*.css site/assets _site/
+      - name: Copy only what the page serves, plus the link preview image
+        run: mkdir _site && cp -r site/index.html site/*.js site/*.css site/assets _site/ && cp assets/modes.png _site/og.png
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
