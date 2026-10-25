@@ -34,7 +34,7 @@ What these numbers are and are not:
 - The samples are written by hand to show what each mode should produce. They are not live model outputs. Real savings depend on how well your model follows the skill.
 - tiktoken is a proxy. Claude and Gemini use different tokenizers, so exact counts will differ.
 - The dialect modes cost a few points more than singkat. Sundanese function words and affixed English verbs are often 2 tokens instead of 1. That is the price of sounding like Bandung or South Jakarta instead of Indonesian with one particle on top.
-- The skill itself costs about 1,030 tokens (o200k) each time it loads. It pays off after a few replies, not on a single short answer.
+- The skill itself costs about 1,200 tokens (o200k) each time it loads. It pays off after a few replies, not on a single short answer.
 
 ### Live on Claude
 
@@ -42,14 +42,14 @@ Real replies, not hand-written ones: `python benchmarks/live.py --claude-code` w
 
 | Mode | Reply tokens | Saved |
 |---|---|---|
-| normal (Claude Code default) | 1,089 | |
-| singkat | 528 | -51.5% |
-| jaksel | 562 | -48.4% |
-| sunda | 551 | -49.4% |
+| normal (Claude Code default) | 1,109 | |
+| singkat | 558 | -49.7% |
+| jaksel | 564 | -49.2% |
+| sunda | 540 | -51.3% |
 
 - Live replies keep their code blocks, lists, and caveats, so they save less than the hand-written samples. About half is the number to expect.
 - Both destructive requests (wiping a production table, force pushing to main) got a full, plain-Indonesian warning in every mode.
-- Sunda read as Sundanese. Jaksel came out mostly plain Indonesian, with 1 to 5% English markers against the 10% the samples hit, so the jaksel rules in `SKILL.md` still need work.
+- Every live reply passes the dialect checks: sunda 23 to 42% loma words with no lemes forms, jaksel 7 to 17% English swaps. Warning blocks stay plain Indonesian and are not counted. An earlier jaksel rule only listed markers and got 1 to 5%, mostly plain Indonesian; listing the exact swaps (`jadi`→`so`, `atau`→`or`) and asking for one per sentence fixed it. The live floor for jaksel is 6%, below the samples' 10%, because live replies carry more technical prose.
 - One run per question. Expect a few points of variance; use `--runs 3` before relying on small differences.
 
 ## The one rule that matters: short is not cheap
@@ -148,7 +148,7 @@ The table above uses tiktoken, OpenAI's tokenizer, as a stand-in. `live.py` meas
 .venv/bin/python benchmarks/live.py --claude-code   # about 32 requests on your Claude plan
 ```
 
-The baseline is Claude Code's own system prompt, and irit appends `SKILL.md` to it, which is close to real use. Your settings, plugins, hooks, MCP servers and tools are switched off for these runs so they cannot skew either side. It reports reply tokens and billed output tokens from Claude itself, the same banned-word and dialect checks on the live replies, and two destructive requests (wiping a production table, force pushing to main) that must still get a clear warning in every mode. Use `--model`, `--effort`, `--runs N` to average out variance, and `--json` to read every reply.
+The baseline is Claude Code's own system prompt, and irit appends `SKILL.md` to it, which is close to real use. Your settings, plugins, hooks, MCP servers and tools are switched off for these runs so they cannot skew either side. It reports reply tokens and billed output tokens from Claude itself, the same banned-word and dialect checks on the live replies, and two destructive requests (wiping a production table, force pushing to main) that must still get a clear warning in every mode. Use `--model`, `--effort`, `--runs N` to average out variance, `--modes jaksel` to test one mode for about 16 requests, and `--json` to read every reply.
 
 With `ANTHROPIC_API_KEY` set you can also use the API directly:
 

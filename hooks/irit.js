@@ -56,9 +56,16 @@ function rules(mode) {
   return `irit is ON, mode ${mode}. Follow these rules from the first reply on.\n\n${out.join('\n').replace(/\n{3,}/g, '\n\n')}`;
 }
 
+// The dialect hint keeps jaksel and sunda from fading into plain Indonesian over a session.
+const STYLE = {
+  singkat: 'plain Indonesian',
+  jaksel: 'Indonesian with English words swapped in (so, but, actually, fix-nya)',
+  sunda: 'Bandung Sundanese loma, tech terms stay',
+};
+
 const reminder = (mode) =>
-  `irit ON (${mode}): terse, in the user's language, no greeting/closer/hedging/recap, full words not tdk/udh/dgn. ` +
-  'Code, commits, PRs, warnings: write normally.';
+  `irit ON (${mode}): terse ${STYLE[mode]}; an English user gets terse English. ` +
+  'No greeting/closer/hedging/recap, full words not tdk/udh/dgn. Code, commits, PRs, warnings: write normally.';
 
 // A spoken switch only counts in a short message, so a bug report that happens to
 // say "mode normal" does not turn irit off for every future session.

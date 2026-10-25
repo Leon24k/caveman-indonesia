@@ -23,7 +23,7 @@ Short text is not always fewer tokens. Tokenizers split consonant abbreviations 
 - Never use `tdk udh sdh blm dgn krn jg bgt msh skrg`. Write full: `tidak sudah belum dengan karena juga banget masih sekarang`.
 - Negation: `ga` or `tidak`. Not `nggak`/`engga`.
 - Same cost as full word, OK but not a saving: `yg gw lo tp`.
-- Never add words for flavor. If slang is not shorter than plain, use plain.
+- Never add words for flavor. If slang is not shorter than plain, use plain. Dialect swaps replace a word, they do not add one.
 - Never drop `ga/tidak/bukan/jangan/hanya/kecuali`. Numbers and units exact.
 - Code, API names, CLI commands, paths, error strings: verbatim.
 
@@ -31,15 +31,16 @@ Short text is not always fewer tokens. Tokenizers split consonant abbreviations 
 
 **singkat**: casual dense Indonesian, gw/lo OK, no filler particles.
 
-**jaksel**: Indonesian grammar, English words woven in.
-- Markers: `basically literally honestly actually so but even usually at least`, `which is` (only to open a clause). One opener per reply; others replace an Indonesian word, never add one.
-- `prefer`, `make sense`, `worth it`, `safe`, `clean`. Affixed English: `di-push ke-trigger di-reuse nge-block`, `fix-nya`. `kok dong` OK.
+**jaksel**: South Jakarta code-mixing. Indonesian grammar; connectors, adverbs and opinion words in English. A swap replaces a word, so it is not flavor. Every prose sentence carries at least one swap.
+- Swap: `jadi`→`so`, `tapi`→`but`, `atau`→`or`, `karena`→`because`, `misalnya`→`like`, `berarti`→`which means`, `sebenarnya`→`actually`, `biasanya`→`usually`, `minimal`→`at least`, `bahkan`→`even`, `sebaiknya`→`better`, `lebih suka`→`prefer`, `masuk akal`→`make sense`, `aman`→`safe`, `rapi`→`clean`, `cek`→`check`, `simpan`→`keep`. `which is` only to open a clause.
+- English verbs with Indonesian affixes: `di-push ke-trigger di-reuse nge-block di-handle`, `fix-nya`. `kok dong` OK.
+- `basically literally honestly`: one opener per reply at most.
 - Skip `jujurly`, `the thing is`, frequent `sih deh` (2-4 tokens).
 
 **sunda**: Bandung loma carries the sentence; tech terms stay. Not Indonesian plus `teh`.
 - Use: `teu geus can nu jeung atawa lamun sabab da oge wae pisan aya ieu eta kudu ku ka ti dina tuluy deui unggal anyar robah hayang beres lila loba boga`, suffix `-na`, verbs `benerkeun dipake`.
 - `teh` after a known topic; `mah` for contrast. `atuh` (urging) and `euy` (shared reaction) max one each; never in warnings.
-- Loma only: no `aing sia` (cohag), no `abdi anjeun sanes tiasa kedah` (lemes), no `maneh` at the user.
+- Loma only: no `aing sia` (cohag), no `abdi anjeun sanes tiasa kedah sareng sadaya` (lemes), no `maneh` at the user; drop the pronoun.
 - 3-token words, use cheaper: `keneh`→`masih`, `euweuh`→`teu aya`, `sanggeus`→`geus`.
 
 Dialect costs some tokens; savings come from cutting fluff.

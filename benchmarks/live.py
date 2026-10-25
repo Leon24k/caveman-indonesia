@@ -21,7 +21,7 @@ Two backends:
                  plugins, hooks, MCP servers and tools are switched off so they
                  cannot skew either side. Uses your plan's usage, not API billing.
 
-Costs: (prompts + safety prompts) x (1 + 3 modes) x --runs requests.
+Costs: (prompts + safety prompts) x (1 + modes) x --runs requests. --modes jaksel tests one mode.
 
 Usage:
     python benchmarks/live.py --claude-code      # no API key needed
@@ -42,7 +42,8 @@ import subprocess
 import sys
 import tempfile
 
-from run import CLAUDE_MODEL, MODES, ROOT, SAMPLES, claude_counter, dialect_problems, find_banned
+from run import (CLAUDE_MODEL, MODES, ROOT, SAMPLES, SUNDA_FORBIDDEN, claude_counter, dialect_problems,
+                 find_banned, prose_words)
 
 SKILL = (ROOT.parent / "skills" / "irit" / "SKILL.md").read_text(encoding="utf-8")
 SKILL_BODY = SKILL.split("---", 2)[2].strip()
@@ -60,6 +61,9 @@ WARNING = re.compile(
     r"hilang|menimpa|timpa|hati-hati",
     re.IGNORECASE,
 )
+# Live replies carry more technical prose than the samples, so jaksel gets a lower
+# floor. 6% still fails the old plain-Indonesian replies, which scored 1 to 5%.
+LIVE_DIALECT_RATIO = {"sunda": 0.25, "jaksel": 0.06}
 
 
 def api_asker(model: str, effort: str):
@@ -118,12 +122,14 @@ def main() -> int:
     parser.add_argument("--effort", default="medium", help="same effort for baseline and irit (default medium)")
     parser.add_argument("--runs", type=int, default=1, help="repeat each request to average out variance")
     parser.add_argument("--claude-code", action="store_true", help="use `claude -p` and your Claude Code login instead of an API key")
+    parser.add_argument("--modes", nargs="+", choices=MODES, default=MODES, help="irit modes to test (default all)")
     parser.add_argument("--json", action="store_true", help="print every reply and the summary as JSON")
     args = parser.parse_args()
+    sys.stdout.reconfigure(encoding="utf-8")  # replies carry emoji; a Windows console codec would crash at the end
 
     ask = (claude_code_asker if args.claude_code else api_asker)(args.model, args.effort)
     samples = json.loads(SAMPLES.read_text(encoding="utf-8"))
-    variants = {"normal": None} | {m: f"{SKILL_BODY}\n\nActive mode: {m}." for m in MODES}
+    variants = {"normal": None} | {m: f"{SKILL_BODY}\n\nActive mode: {m}." for m in args.modes}
 
     replies, failures = [], []
     for s in samples + SAFETY:
@@ -146,20 +152,23 @@ def main() -> int:
                 if hit := find_banned(r["text"]):
                     failures.append(f"{tag}: uses banned abbreviation {hit}")
                 if safety:
-                    # Auto-clarity drops dialect for warnings, so no density check here.
+                    # Auto-clarity drops dialect for warnings, so no density check here,
+                    # but a Sundanese line around the warning must still be loma.
                     if not warned:
                         failures.append(f"{tag}: destructive request answered without a warning")
+                    if mode == "sunda" and (bad := sorted(set(prose_words(r["text"])) & SUNDA_FORBIDDEN)):
+                        failures.append(f"{tag}: wrong register (cohag/lemes/address): {bad}")
                     continue
                 if base and r["tokens"] >= base:
                     failures.append(f"{tag}: {r['tokens']} tokens >= baseline {base}")
-                failures += [f"{tag}: {p}" for p in dialect_problems(mode, r["text"])]
+                failures += [f"{tag}: {p}" for p in dialect_problems(mode, r["text"], LIVE_DIALECT_RATIO)]
 
     summary = {}
     for mode in variants:
         rs = [r for r in replies if r["mode"] == mode and not r["safety"]]
         summary[mode] = {"reply_tokens": statistics.mean(r["tokens"] for r in rs),
                          "billed_output": statistics.mean(r["billed"] for r in rs)}
-    for mode in MODES:
+    for mode in args.modes:
         summary[mode]["saved_pct"] = round(100 * (1 - summary[mode]["reply_tokens"] / summary["normal"]["reply_tokens"]), 1)
 
     backend = "claude-code" if args.claude_code else "api"

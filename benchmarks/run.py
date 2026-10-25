@@ -57,13 +57,17 @@ SUNDA_LOMA = set(
     "teu geus can nu jeung atawa lamun sabab da oge wae pisan aya ieu eta kudu ku ka ti dina "
     "tuluy deui unggal anyar robah hayang beres lila beurat hampang loba boga sorangan mah teh atuh "
     "euy matak ngarah sanajan tetep salila kaluar benerkeun izinkeun dipake kabuka kakontrol "
-    "munggaran biasana hasilna datana babagi luhur tur sakuat ngan sababaraha ngablokir ngirim nyimpen".split()
+    "munggaran biasana hasilna datana babagi luhur tur sakuat ngan sababaraha ngablokir ngirim nyimpen "
+    "na pake make nyieun heula leuwih bakal batan lain kawas hiji gampang mimitian jero pikeun bareng teuing handap "
+    "keur supaya lengkep engke gumantung henteu nambah menta nepi leutik ukur kahiji naha gede ampir kapake "
+    "ngajalankeun dijalankeun jalankeun dibalikeun dibatalkeun disimpen simpen contona bedana robahan parobahan "
+    "ayeuna catetan kalewat pesen".split()
 )
-SUNDA_FORBIDDEN = set("aing sia abdi anjeun sanes tiasa kedah maneh".split())  # cohag, lemes, direct address
+SUNDA_FORBIDDEN = set("aing sia abdi anjeun sanes tiasa kedah sareng sadaya ngantosan maneh".split())  # cohag, lemes, direct address
 JAKSEL_MARKERS = set(
     "basically literally honestly actually so but even usually least which prefer sense worth safe clean "
     "wrap stay allow fix changes open loaded first initial run full virtualize shared share layer or "
-    "reuse trigger push unstage block handle".split()  # English verbs used with di-/ke-/nge- affixes
+    "reuse trigger push unstage block handle better check because like means keep depends default".split()  # English verbs used with di-/ke-/nge- affixes
 )
 MIN_DIALECT_RATIO = {"sunda": 0.25, "jaksel": 0.10}
 MAX_PER_REPLY = {"atuh": 1, "euy": 1}
@@ -109,15 +113,16 @@ def prose_words(text: str) -> list[str]:
     return re.findall(r"[a-z]+", re.sub(r"`[^`]*`", " ", text).lower())
 
 
-def dialect_problems(mode: str, text: str) -> list[str]:
-    words = prose_words(text)
-    if not words or mode not in MIN_DIALECT_RATIO:
+def dialect_problems(mode: str, text: str, floor: dict[str, float] = MIN_DIALECT_RATIO) -> list[str]:
+    # Auto-clarity keeps "> **Peringatan:**" blocks in plain Indonesian, so they do not count.
+    words = prose_words(re.sub(r"^>.*$", "", text, flags=re.MULTILINE))
+    if not words or mode not in floor:
         return []
     markers = SUNDA_LOMA if mode == "sunda" else JAKSEL_MARKERS
     ratio = sum(w in markers for w in words) / len(words)
     out = []
-    if ratio < MIN_DIALECT_RATIO[mode]:
-        out.append(f"dialect too thin: {ratio:.0%} marker words, need {MIN_DIALECT_RATIO[mode]:.0%}")
+    if ratio < floor[mode]:
+        out.append(f"dialect too thin: {ratio:.0%} marker words, need {floor[mode]:.0%}")
     if mode == "sunda":
         bad = sorted(set(words) & SUNDA_FORBIDDEN)
         if bad:

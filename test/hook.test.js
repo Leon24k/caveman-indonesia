@@ -30,7 +30,7 @@ test('auto-on: a fresh session gets singkat rules without typing /irit', (t) => 
   const ctx = s.start();
   assert.match(ctx, /irit is ON, mode singkat/);
   assert.match(ctx, /Never use `tdk/);
-  assert.doesNotMatch(ctx, /Bandung loma|Markers:/, 'other modes are filtered out');
+  assert.doesNotMatch(ctx, /Bandung loma|Swap:/, 'other modes are filtered out');
   assert.match(s.say('kenapa build gagal?'), /^irit ON \(singkat\)/, 'every turn gets the reminder');
 });
 
@@ -41,12 +41,12 @@ test('a mode switch persists into the next session', (t) => {
   const ctx = s.start();
   assert.match(ctx, /mode sunda/);
   assert.match(ctx, /Bandung loma/);
-  assert.doesNotMatch(ctx, /Markers:|- singkat: "/);
+  assert.doesNotMatch(ctx, /Swap:|- singkat: "/);
 });
 
 test('a spoken switch injects the new mode rules once', (t) => {
   const s = sandbox(t);
-  assert.match(s.say('oke irit jaksel ya'), /mode jaksel[\s\S]*Markers:/);
+  assert.match(s.say('oke irit jaksel ya'), /mode jaksel[\s\S]*Swap:/);
   assert.match(s.say('lanjut'), /^irit ON \(jaksel\)/);
 });
 
@@ -81,6 +81,8 @@ test('a long message that only mentions a switch phrase does not switch', () => 
   assert.equal(parseSwitch('tolong irit sunda dong'), 'sunda');
 });
 
-test('the reminder follows the user language, not always Indonesian', (t) => {
-  assert.match(sandbox(t).say('why does the build fail?'), /in the user's language/);
+test('the reminder names the dialect and still allows English users', (t) => {
+  const s = sandbox(t);
+  assert.match(s.say('/irit jaksel'), /English words swapped in.*English user gets terse English/);
+  assert.match(s.say('/irit sunda'), /Sundanese loma/);
 });

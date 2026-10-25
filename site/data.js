@@ -740,5 +740,5 @@ window.IRIT = {
    "saved": 59.7
   }
  },
- "skillTokens": 1028
+ "skillTokens": 1192
 };
