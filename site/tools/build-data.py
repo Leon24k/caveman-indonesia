@@ -16,6 +16,7 @@ Run from the repo root:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -24,6 +25,7 @@ import tiktoken
 ROOT = Path(__file__).resolve().parents[2]
 SAMPLES = json.loads((ROOT / "benchmarks" / "samples.json").read_text(encoding="utf-8"))
 OUT = ROOT / "site" / "data.js"
+INDEX = ROOT / "site" / "index.html"
 ENC = tiktoken.get_encoding("o200k_base")
 SAMPLE_ID = "react-rerender"
 MODES = ["singkat", "jaksel", "sunda"]
@@ -121,8 +123,20 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
+    # Keep the no-JS fallback token count in index.html in sync with data.js.
+    formatted_skill = f"{data['skillTokens']:,}".replace(",", ".")
+    html = INDEX.read_text(encoding="utf-8")
+    updated, count = re.subn(
+        r"(<span data-skill-tokens>)[0-9.]+(</span>)",
+        rf"\g<1>{formatted_skill}\g<2>",
+        html,
+    )
+    if count != 1:
+        sys.exit(f"expected 1 data-skill-tokens span in {INDEX.relative_to(ROOT)}, found {count}")
+    if updated != html:
+        INDEX.write_text(updated, encoding="utf-8", newline="\n")
     print(f"{OUT.relative_to(ROOT)}: normal {len(normal)} tok, fluff {fluff_n}, after chisel {data['afterChisel']}, "
-          f"singkat {len(data['singkat'])}")
+          f"singkat {len(data['singkat'])}, skill {data['skillTokens']}")
 
 
 if __name__ == "__main__":

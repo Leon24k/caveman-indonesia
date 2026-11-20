@@ -179,14 +179,19 @@
       stage.setAttribute('data-sc-verify-state', count + '|' + ph + '|' + swapM.toFixed(2) + '|' + falling + '|' + motion.toFixed(1));
     }
 
-    function frame() {
+    function sync() {
       var p = parseFloat(act.style.getPropertyValue('--sc-p'));
       if (!isNaN(p) && p !== last) { last = p; render(p); }
-      requestAnimationFrame(frame);
     }
-    addEventListener('resize', function () { fluff.forEach(function (t) { dropShard(t); t.f = -1; }); last = -1; });
+    if ('MutationObserver' in window) {
+      new MutationObserver(sync).observe(act, { attributes: true, attributeFilter: ['style'] });
+    } else {
+      addEventListener('scroll', sync, { passive: true });
+    }
+    addEventListener('resize', function () { fluff.forEach(function (t) { dropShard(t); t.f = -1; }); last = -1; sync(); });
+    last = 0;
     render(0);
-    requestAnimationFrame(frame);
+    sync();
   }
 
   /* ---------------------------------------------------------------- copy -- */
@@ -275,12 +280,29 @@
     var meta = document.querySelector('meta[name="theme-color"]');
     var sys = matchMedia('(prefers-color-scheme: light)');
     var lastCanvas = null;
+    var BASE = [12, 12, 13], PAPER = [243, 239, 233];
+    // The engine interpolates --sc-canvas between the dark act colours. Mirror
+    // that offset onto paper whenever --sc-canvas changes in light mode.
+    function syncCanvas() {
+      if (root.getAttribute('data-theme') !== 'light') return;
+      var c = root.style.getPropertyValue('--sc-canvas');
+      if (c === lastCanvas) return;
+      lastCanvas = c;
+      var m = c.match(/\d+/g);
+      if (m && m.length >= 3) {
+        var d = [m[0] - BASE[0], m[1] - BASE[1], m[2] - BASE[2]], avg = (d[0] + d[1] + d[2]) / 3;
+        root.style.setProperty('--canvas-light', 'rgb(' + [0, 1, 2].map(function (i) {
+          return Math.round(PAPER[i] - avg * 1.6 + (d[i] - avg));
+        }).join(',') + ')');
+      }
+    }
     function saved() { try { return localStorage.getItem('irit-theme'); } catch (e) { return null; } }
     function apply(t) {
       root.setAttribute('data-theme', t);
       btn.querySelector('.theme__label').textContent = t === 'light' ? 'Mode gelap' : 'Mode terang';
       if (meta) meta.setAttribute('content', t === 'light' ? '#f3efe9' : '#0c0c0d');
       lastCanvas = null;
+      syncCanvas();
     }
     if (!btn) return;
     apply(root.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
@@ -301,25 +323,11 @@
       if (s !== 'light' && s !== 'dark') apply(e.matches ? 'light' : 'dark');
     });
 
-    // The engine interpolates --sc-canvas between the dark act colours. Mirror
-    // that offset onto paper: a slightly warmer, darker act stays one on paper.
-    var BASE = [12, 12, 13], PAPER = [243, 239, 233];
-    (function drift() {
-      if (root.getAttribute('data-theme') === 'light') {
-        var c = root.style.getPropertyValue('--sc-canvas');
-        if (c !== lastCanvas) {
-          lastCanvas = c;
-          var m = c.match(/\d+/g);
-          if (m && m.length >= 3) {
-            var d = [m[0] - BASE[0], m[1] - BASE[1], m[2] - BASE[2]], avg = (d[0] + d[1] + d[2]) / 3;
-            root.style.setProperty('--canvas-light', 'rgb(' + [0, 1, 2].map(function (i) {
-              return Math.round(PAPER[i] - avg * 1.6 + (d[i] - avg));
-            }).join(',') + ')');
-          }
-        }
-      }
-      requestAnimationFrame(drift);
-    })();
+    if ('MutationObserver' in window) {
+      new MutationObserver(syncCanvas).observe(root, { attributes: true, attributeFilter: ['style'] });
+    } else {
+      addEventListener('scroll', syncCanvas, { passive: true });
+    }
   }
 
   initTheme();

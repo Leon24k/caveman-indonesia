@@ -116,7 +116,7 @@
       <div class="rail" data-sc-pan="0.04">
         <div class="rail__lead">
           <h2 class="sc-display modes__title">Satu jawaban, tiga logat.</h2>
-          <p class="sc-body">Ganti kapan saja dengan <code>/irit</code>, <code>/irit jaksel</code>, atau <code>/irit sunda</code>. Balik normal dengan <code>/irit off</code>. Kalau kamu menulis dalam bahasa Inggris, irit menjawab dalam bahasa Inggris yang ringkas, tanpa logat.</p>
+          <p class="sc-body">Ganti kapan saja dengan <code>/irit</code>, <code>/irit jaksel</code>, atau <code>/irit sunda</code>, dan <code>/irit off</code> untuk balik normal (di plugin Claude Code: <code>/irit:irit</code>, atau ketik &ldquo;irit sunda&rdquo; / &ldquo;mode normal&rdquo;). Bahasa Inggris dijawab ringkas dalam bahasa Inggris, tanpa logat.</p>
         </div>
         <article class="mode" data-mode="singkat">
           <h3 class="mode__name">singkat</h3>
@@ -157,7 +157,20 @@
           <tr class="ledger__row" data-row="sunda"><th scope="row">sunda</th><td class="n" data-v>350</td><td><span class="bar" style="--w:0.403"></span></td><td class="n ledger__save" data-save>59,7%</td></tr>
         </tbody>
       </table>
-      <p class="proof__fine">Sampelnya ditulis tangan untuk menunjukkan bentuk tiap mode, bukan keluaran model langsung. Hasil nyata tergantung seberapa patuh model kamu. Skill ini sendiri memakan sekitar <span data-skill-tokens>1.197</span> token setiap dimuat, jadi hematnya baru terasa setelah beberapa jawaban.</p>
+      <p class="proof__fine">Sampel di atas ditulis tangan untuk menunjukkan bentuk tiap mode, bukan keluaran model langsung. Skill ini memakan sekitar <span data-skill-tokens>1.197</span> token setiap dimuat, jadi hematnya baru terasa setelah beberapa jawaban.</p>
+
+      <div class="live" data-sc-in data-sc-stagger="70">
+        <div class="live__lead">
+          <h3 class="live__title">Diuji langsung di Claude: hemat sekitar separuh.</h3>
+          <p class="sc-body">Enam pertanyaan yang sama di Opus 5.5 lewat Claude Code (<code>python benchmarks/live.py --claude-code</code>, 1 run). Blok kode, daftar, dan peringatan tetap utuh, jadi hemat nyatanya di kisaran 50%.</p>
+        </div>
+        <dl class="live__stats">
+          <div><dt>biasa</dt><dd><span class="n">1.109</span> <span class="live__unit">token/jawaban</span></dd></div>
+          <div><dt>singkat</dt><dd><span class="n">558</span> <span class="live__save">&minus;49,7%</span></dd></div>
+          <div><dt>jaksel</dt><dd><span class="n">564</span> <span class="live__save">&minus;49,2%</span></dd></div>
+          <div><dt>sunda</dt><dd><span class="n">540</span> <span class="live__save">&minus;51,3%</span></dd></div>
+        </dl>
+      </div>
 
       <div class="safety" data-sc-in data-sc-stagger="70">
         <h3 class="safety__title">Kalau urusannya berisiko, irit berhenti irit.</h3>
@@ -179,7 +192,7 @@
           <button class="copy" type="button" data-copy="npx caveman-indonesia">Salin perintah</button>
         </div>
         <dl class="close__alt" data-sc-cue="0.1">
-          <div><dt>Claude Code</dt><dd><code>/plugin marketplace add Leon24k/caveman-indonesia</code><br><code>/plugin install irit@caveman-indonesia</code><br><span class="close__note">Langsung aktif di tiap sesi baru, tanpa ketik <code>/irit</code>.</span></dd></div>
+          <div><dt>Claude Code</dt><dd><code>/plugin marketplace add Leon24k/caveman-indonesia</code><br><code>/plugin install irit@caveman-indonesia</code><br><span class="close__note">Langsung aktif di tiap sesi baru. Ganti mode dengan <code>/irit:irit sunda</code> atau &ldquo;mode normal&rdquo;.</span></dd></div>
           <div><dt>skills CLI</dt><dd><code>npx skills add Leon24k/caveman-indonesia</code></dd></div>
         </dl>
         <p class="close__last" data-sc-cue="0.14">Hemat token, bukan hemat makna.</p>

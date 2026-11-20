@@ -25,10 +25,12 @@ for (const [w, h] of [[1440, 900], [390, 844], [360, 640]]) {
     pageX: document.documentElement.scrollWidth - innerWidth,
     toks: document.querySelectorAll(".reply--normal .tok").length,
     irit: document.querySelectorAll(".reply--irit .tok").length,
+    wantToks: window.IRIT.normalCount,
+    wantIrit: window.IRIT.singkat.length,
   }));
   ok(m.rail > w * 0.5, `${w}px rail overflow ${m.rail}px (want > ${w * 0.5})`);
   ok(m.pageX <= 0, `${w}px no horizontal page overflow (${m.pageX})`);
-  ok(m.toks === 160 && m.irit === 48, `${w}px tokens rendered ${m.toks} / ${m.irit}`);
+  ok(m.toks === m.wantToks && m.irit === m.wantIrit, `${w}px tokens rendered ${m.toks} / ${m.irit} (want ${m.wantToks} / ${m.wantIrit})`);
 
   // Keyboard: first Tab lands on the skip link.
   await page.keyboard.press("Tab");
@@ -49,7 +51,7 @@ for (const [w, h] of [[1440, 900], [390, 844], [360, 640]]) {
     await new Promise((r) => setTimeout(r, 500));
     return { num: document.querySelector("[data-chisel-num]").textContent, phase: document.querySelector("[data-chisel-phase]").textContent };
   });
-  ok(end.num === "48", `${w}px chisel lands on ${end.num}: "${end.phase}"`);
+  ok(end.num === String(m.wantIrit), `${w}px chisel lands on ${end.num}: "${end.phase}"`);
 
   // Copy button: real clipboard contents and visible confirmation.
   await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
