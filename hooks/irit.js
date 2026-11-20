@@ -34,9 +34,14 @@ function readMode() {
 // Write a temp file and rename: rename replaces a symlink instead of following it.
 function writeMode(mode) {
   fs.mkdirSync(dir, { recursive: true });
-  const tmp = `${stateFile}.${process.pid}`;
-  fs.writeFileSync(tmp, mode);
-  fs.renameSync(tmp, stateFile);
+  const tmp = `${stateFile}.${process.pid}.${Date.now()}`;
+  try {
+    fs.writeFileSync(tmp, mode);
+    fs.renameSync(tmp, stateFile);
+  } catch (err) {
+    try { fs.unlinkSync(tmp); } catch {}
+    throw err;
+  }
 }
 
 // SKILL.md without frontmatter, keeping only the active mode's rules and example.

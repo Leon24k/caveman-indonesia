@@ -108,9 +108,15 @@ def check_banned(counters: dict[str, Counter]) -> list[str]:
     return wrong
 
 
+def strip_code(text: str) -> str:
+    """Drop fenced and inline code so code identifiers and backticks inside fences never count as prose."""
+    text = re.sub(r"(`{3,}|~{3,})[\s\S]*?\1", " ", text)
+    return re.sub(r"`[^`]*`", " ", text)
+
+
 def prose_words(text: str) -> list[str]:
-    """Lowercase words outside inline code, keeping affixed forms like datana or file-na split."""
-    return re.findall(r"[a-z]+", re.sub(r"`[^`]*`", " ", text).lower())
+    """Lowercase words outside code blocks/spans, keeping affixed forms like datana or file-na split."""
+    return re.findall(r"[a-z]+", strip_code(text).lower())
 
 
 def dialect_problems(mode: str, text: str, floor: dict[str, float] = MIN_DIALECT_RATIO) -> list[str]:
@@ -134,8 +140,7 @@ def dialect_problems(mode: str, text: str, floor: dict[str, float] = MIN_DIALECT
 
 
 def find_banned(text: str) -> list[str]:
-    words = re.findall(r"[A-Za-z]+", re.sub(r"`[^`]*`", " ", text).lower())
-    return sorted({w for w in words if w in BANNED})
+    return sorted({w for w in prose_words(text) if w in BANNED})
 
 
 def skill_banned_list() -> set[str]:

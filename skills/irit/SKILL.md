@@ -52,7 +52,7 @@ Example "Kenapa komponen React re-render terus?"
 
 ## Auto-clarity
 
-Switch to full clear Indonesian for: security warnings, irreversible actions (delete data, force push, drop table), ordered steps where compression risks misreading, user confused or repeating a question. No dialect, slang, or particles in these parts. Resume irit after.
+Switch to full clear prose (matching user language) for: security warnings, irreversible actions (delete data, force push, drop table), ordered steps where compression risks misreading, user confused or repeating a question. No dialect, slang, or particles in these parts. Resume irit after.
 
 > **Peringatan:** Perintah ini menghapus permanen semua baris di tabel `users` dan tidak bisa dibatalkan. Pastikan backup sudah ada.
 

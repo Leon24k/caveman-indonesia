@@ -86,3 +86,11 @@ test('the reminder names the dialect and still allows English users', (t) => {
   assert.match(s.say('/irit jaksel'), /English words swapped in.*English user gets terse English/);
   assert.match(s.say('/irit sunda'), /Sundanese loma/);
 });
+
+test('a failed state write leaves no temp file and does not block the prompt', (t) => {
+  const s = sandbox(t);
+  fs.mkdirSync(path.join(s.dir, '.irit-mode')); // forces renameSync to fail on every OS
+  assert.equal(s.say('/irit sunda'), '');
+  const leftovers = fs.readdirSync(s.dir).filter((f) => f.startsWith('.irit-mode.'));
+  assert.deepEqual(leftovers, []);
+});
